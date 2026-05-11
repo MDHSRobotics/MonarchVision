@@ -24,6 +24,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Timer;
+
 import static frc.robot.Constants.Vision.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -37,6 +39,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Robot extends TimedRobot {
     private SwerveDrive drivetrain;
@@ -49,6 +52,13 @@ public class Robot extends TimedRobot {
     private final double VISION_DES_RANGE_m = 1.25;
 
     private XboxController controller;
+
+    private int lastSeenTagID = -1;
+    private double lastSeenRange = 0.0;
+    private double lastSeenYaw = 0.0;
+    private boolean lastSeenIsTarget = false;
+    private double lastSeenTime = 0.0;
+    private static final double TARGET_LOST_TIMEOUT_SEC = 0.25;
 
     @Override
     public void robotInit() {
@@ -88,34 +98,59 @@ public class Robot extends TimedRobot {
 
         // Read in relevant data from the Camera
         boolean targetVisible = false;
-        double targetYaw = 0.0;
-        double targetRange = 0.0;
-        int targetFiduciaryID = -1;
 
         var results = camera.getAllUnreadResults();
         if (!results.isEmpty()) {
             // Camera processed a new frame since last
             // Get the last one in the list.
             var result = results.get(results.size() - 1);
+            PhotonTrackedTarget bestTarget = null;
             if (result.hasTargets()) {
                 // At least one AprilTag was seen by the camera
                 for (var target : result.getTargets()) {
                     int id = target.getFiducialId();
                     if (id == 7) {
                         // Found Tag 7, record its information
-                        targetYaw = target.getYaw();
-                        targetRange =
-                                PhotonUtils.calculateDistanceToTargetMeters(
-                                        0.5, // Measured with a tape measure, or in CAD.
-                                        1.435, // From 2024 game manual for ID 7
-                                        Units.degreesToRadians(-30.0), // Measured with a protractor, or in CAD.
-                                        Units.degreesToRadians(target.getPitch()));
-
+                        bestTarget = target;
                         targetVisible = true;
+                        break;
                     }
-                    targetFiduciaryID = id;
                 }
+                if (!targetVisible) {
+                    // Found some April tags but not the target of interest
+                    // So just report the best one found
+                    bestTarget = result.getBestTarget();
+                    targetVisible = false;
+                }
+                lastSeenTagID = bestTarget.getFiducialId();
+                lastSeenIsTarget = targetVisible;
+                lastSeenYaw = bestTarget.getYaw();
+                lastSeenRange = PhotonUtils.calculateDistanceToTargetMeters(
+                                    0.5, // Measured with a tape measure, or in CAD.
+                                    1.435, // From 2024 game manual for ID 7
+                                    Units.degreesToRadians(-30.0), // Measured with a protractor, or in CAD.
+                                    Units.degreesToRadians(bestTarget.getPitch()));
+                lastSeenYaw = bestTarget.getYaw();
+
+                lastSeenTime = Timer.getFPGATimestamp();
             }
+            
+            boolean recentlySeen = Timer.getFPGATimestamp() - lastSeenTime < TARGET_LOST_TIMEOUT_SEC;
+            if (recentlySeen) {
+                // Put debug information to the dashboard
+                SmartDashboard.putBoolean("Target Visible", lastSeenIsTarget);
+                SmartDashboard.putNumber("Detected Tag ID", lastSeenTagID);
+                SmartDashboard.putNumber("Detected Range (m)", lastSeenRange);
+                SmartDashboard.putNumber("Detected Yaw", lastSeenYaw);
+
+            }
+            else {
+                SmartDashboard.putBoolean("Target Visible", false);
+                SmartDashboard.putNumber("Detected Tag ID", -1);
+                SmartDashboard.putNumber("Detected Range (m)", 0.0);
+                SmartDashboard.putNumber("Detected Yaw", 0.0);
+
+            }  
         }
 
         // Auto-align when requested
@@ -128,18 +163,15 @@ public class Robot extends TimedRobot {
             // Override the driver's turn and fwd/rev command with an automatic one
             // That turns toward the tag, and gets the range right.
             turn =
-                    (VISION_DES_ANGLE_deg - targetYaw) * VISION_TURN_kP * Constants.Swerve.kMaxAngularSpeed;
+                    (VISION_DES_ANGLE_deg - lastSeenYaw) * VISION_TURN_kP * Constants.Swerve.kMaxAngularSpeed;
             forward =
-                    (VISION_DES_RANGE_m - targetRange) * VISION_STRAFE_kP * Constants.Swerve.kMaxLinearSpeed;
+                    (VISION_DES_RANGE_m - lastSeenRange) * VISION_STRAFE_kP * Constants.Swerve.kMaxLinearSpeed;
         }
 
         // Command drivetrain motors based on target speeds
         drivetrain.drive(forward, strafe, turn);
 
-        // Put debug information to the dashboard
-        SmartDashboard.putBoolean("Vision Target Visible", targetVisible);
-        SmartDashboard.putNumber("Vision Target Range (m)", targetRange);
-        SmartDashboard.putNumber("Fiduciary ID", targetFiduciaryID);
+
     }
 
     @Override

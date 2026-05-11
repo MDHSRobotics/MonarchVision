@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 import static frc.robot.Constants.Vision.*;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -165,12 +166,28 @@ public class Robot extends TimedRobot {
                     (VISION_DES_RANGE_m - lastSeenRange) * VISION_STRAFE_kP * Constants.Swerve.kMaxLinearSpeed;
         }
 
+        // Orient robot based on POV buttons
+        int pov = controller.getPOV();
+        if (pov != -1) {
+            double targetHeadingDeg = pov;
+            double currentHeadingDeg = drivetrain.getPose().getRotation().getDegrees();
+
+            double errorDeg = MathUtil.inputModulus(
+                targetHeadingDeg - currentHeadingDeg,
+                -180.0,
+                180.0
+            );
+
+            turn = errorDeg * VISION_TURN_kP * Constants.Swerve.kMaxAngularSpeed;
+            forward = 0.0;
+            strafe = 0.0;
+        }
+
         // Command drivetrain motors based on target speeds
         //if (forward > 0.01) System.out.println("Forward = "+forward);
         //if (turn > 0.01) System.out.println("Turn = "+turn);
         //if (strafe > 0.01) System.out.println("Strafe = "+strafe);
         drivetrain.drive(forward, strafe, turn);
-
 
     }
 

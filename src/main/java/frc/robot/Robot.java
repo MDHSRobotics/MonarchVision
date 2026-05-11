@@ -49,7 +49,7 @@ public class Robot extends TimedRobot {
     private final double VISION_TURN_kP = 0.01;
     private final double VISION_DES_ANGLE_deg = 0.0;
     private final double VISION_STRAFE_kP = 0.5;
-    private final double VISION_DES_RANGE_m = 1.25;
+    private final double VISION_DES_RANGE_m = 3.125;
 
     private XboxController controller;
 
@@ -128,7 +128,7 @@ public class Robot extends TimedRobot {
                 lastSeenRange = PhotonUtils.calculateDistanceToTargetMeters(
                                     0.5, // Measured with a tape measure, or in CAD.
                                     1.435, // From 2024 game manual for ID 7
-                                    Units.degreesToRadians(-30.0), // Measured with a protractor, or in CAD.
+                                    Units.degreesToRadians(30.0), // Measured with a protractor, or in CAD.
                                     Units.degreesToRadians(bestTarget.getPitch()));
                 lastSeenYaw = bestTarget.getYaw();
 
@@ -154,9 +154,6 @@ public class Robot extends TimedRobot {
         }
 
         // Auto-align when requested
-        if (controller.getAButton()) {
-            System.out.println("Found buttonA");
-        }
         if (controller.getAButton() && targetVisible) {
             // Driver wants auto-alignment to tag 7
             // And, tag 7 is in sight, so we can turn toward it.
@@ -169,6 +166,9 @@ public class Robot extends TimedRobot {
         }
 
         // Command drivetrain motors based on target speeds
+        //if (forward > 0.01) System.out.println("Forward = "+forward);
+        //if (turn > 0.01) System.out.println("Turn = "+turn);
+        //if (strafe > 0.01) System.out.println("Strafe = "+strafe);
         drivetrain.drive(forward, strafe, turn);
 
 

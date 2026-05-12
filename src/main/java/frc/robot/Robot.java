@@ -36,11 +36,16 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonTrackedTarget;
+
+import com.pathplanner.lib.auto.AutoBuilder;
 
 public class Robot extends TimedRobot {
     private SwerveDrive drivetrain;
@@ -61,6 +66,9 @@ public class Robot extends TimedRobot {
     private double lastSeenTime = 0.0;
     private static final double TARGET_LOST_TIMEOUT_SEC = 0.25;
 
+    private Command autonomousCommand;
+    private SendableChooser<Command> autoChooser = null;
+
     @Override
     public void robotInit() {
         drivetrain = new SwerveDrive();
@@ -69,10 +77,20 @@ public class Robot extends TimedRobot {
         visionSim = new VisionSim(camera);
 
         controller = new XboxController(0);
+
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+    }
+
+    public Command getAutonomousCommand() {
+        return autoChooser.getSelected();
     }
 
     @Override
     public void robotPeriodic() {
+
+        CommandScheduler.getInstance().run();
+        
         // Update drivetrain subsystem
         drivetrain.periodic();
 
@@ -87,6 +105,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+        if (autonomousCommand != null) {
+            autonomousCommand.cancel();
+        }
         resetPose();
     }
 
@@ -189,6 +210,15 @@ public class Robot extends TimedRobot {
         //if (strafe > 0.01) System.out.println("Strafe = "+strafe);
         drivetrain.drive(forward, strafe, turn);
 
+    }
+
+    @Override
+    public void autonomousInit() {
+        autonomousCommand = getAutonomousCommand();
+
+        if (autonomousCommand != null) {
+            autonomousCommand.schedule();
+        }
     }
 
     @Override

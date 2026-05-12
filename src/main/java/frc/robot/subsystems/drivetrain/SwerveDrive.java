@@ -26,6 +26,12 @@ package frc.robot.subsystems.drivetrain;
 
 import static frc.robot.Constants.Swerve.*;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.DriveFeedforwards;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -39,12 +45,15 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.simulation.ADXRS450_GyroSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Swerve.ModuleConstants;
 import frc.robot.Robot;
 
-public class SwerveDrive {
+public class SwerveDrive extends SubsystemBase{
     // Construct the swerve modules with their respective constants.
     // The SwerveModule class will handle all the details of controlling the modules.
     private final SwerveModule[] swerveMods = {
@@ -102,6 +111,27 @@ public class SwerveDrive {
                         DCMotor.getFalcon500(1),
                         kSteerGearRatio,
                         kinematics);
+
+        // ---- PathPlanner
+        try {
+                AutoBuilder.configure(
+                this::getPose,
+                pose -> resetPose(pose, false),
+                this::getRobotRelativeSpeeds,
+                (speeds, feedforwards) -> driveRobotRelative(speeds, feedforwards),
+                new PPHolonomicDriveController(
+                    new PIDConstants(5.0, 0.0, 0.0),
+                    new PIDConstants(5.0, 0.0, 0.0)
+                ),
+                RobotConfig.fromGUISettings(),
+                // NOTE: the following FALSE relates to path flipping while tesing in sim
+                () -> false,
+                this
+            );
+        } catch (Exception e) {
+            DriverStation.reportError("Failed to load PathPlanner config", e.getStackTrace());
+        }
+        System.out.println("Swerve Constructed");
     }
 
     public void periodic() {
@@ -329,4 +359,23 @@ public class SwerveDrive {
     public double getCurrentDraw() {
         return totalCurrentDraw;
     }
+
+    // Methods needed by PathPlanner
+    public ChassisSpeeds getRobotRelativeSpeeds() {
+        return kinematics.toChassisSpeeds(
+            swerveMods[0].getState(),
+            swerveMods[1].getState(),
+            swerveMods[2].getState(),
+            swerveMods[3].getState()
+        );
+    }
+
+    public void driveRobotRelative(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        driveRobotRelative(speeds);
+    }
+
+    public void driveRobotRelative(ChassisSpeeds speeds) {
+        setChassisSpeeds(speeds, true, false);
+    }
+
 }

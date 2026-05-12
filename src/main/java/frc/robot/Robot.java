@@ -55,7 +55,7 @@ public class Robot extends TimedRobot {
     private final double VISION_TURN_kP = 0.01;
     private final double VISION_DES_ANGLE_deg = 0.0;
     private final double VISION_STRAFE_kP = 0.5;
-    private final double VISION_DES_RANGE_m = 3.125;
+    private final double VISION_DES_RANGE_m = 1.25;
 
     private XboxController controller;
 
@@ -138,7 +138,7 @@ public class Robot extends TimedRobot {
                 lastSeenYaw = bestTarget.getYaw();
                 lastSeenRange = PhotonUtils.calculateDistanceToTargetMeters(
                                     0.5, // Measured with a tape measure, or in CAD.
-                                    1.435, // From 2024 game manual for ID 7
+                                    0.889, // From 2026 game manual for ID 7
                                     Units.degreesToRadians(30.0), // Measured with a protractor, or in CAD.
                                     Units.degreesToRadians(bestTarget.getPitch()));
                 lastSeenYaw = bestTarget.getYaw();

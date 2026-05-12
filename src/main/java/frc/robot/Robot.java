@@ -90,6 +90,9 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
 
         CommandScheduler.getInstance().run();
+
+        // Read camera related information
+        readCamera();
         
         // Update drivetrain subsystem
         drivetrain.periodic();
@@ -103,22 +106,8 @@ public class Robot extends TimedRobot {
         drivetrain.stop();
     }
 
-    @Override
-    public void teleopInit() {
-        if (autonomousCommand != null) {
-            autonomousCommand.cancel();
-        }
-        resetPose();
-    }
-
-    @Override
-    public void teleopPeriodic() {
-        // Calculate drivetrain commands from Joystick values
-        double forward = -controller.getLeftY() * Constants.Swerve.kMaxLinearSpeed;
-        double strafe = -controller.getLeftX() * Constants.Swerve.kMaxLinearSpeed;
-        double turn = -controller.getRightX() * Constants.Swerve.kMaxAngularSpeed;
-
-        // Read in relevant data from the Camera
+    private void readCamera() {
+                // Read in relevant data from the Camera
         boolean targetVisible = false;
 
         var results = camera.getAllUnreadResults();
@@ -174,9 +163,25 @@ public class Robot extends TimedRobot {
 
             }  
         }
+    }
+
+    @Override
+    public void teleopInit() {
+        if (autonomousCommand != null) {
+            autonomousCommand.cancel();
+        }
+        resetPose();
+    }
+
+    @Override
+    public void teleopPeriodic() {
+        // Calculate drivetrain commands from Joystick values
+        double forward = -controller.getLeftY() * Constants.Swerve.kMaxLinearSpeed;
+        double strafe = -controller.getLeftX() * Constants.Swerve.kMaxLinearSpeed;
+        double turn = -controller.getRightX() * Constants.Swerve.kMaxAngularSpeed;
 
         // Auto-align when requested
-        if (controller.getAButton() && targetVisible) {
+        if (controller.getAButton() && lastSeenIsTarget) {
             // Driver wants auto-alignment to tag 7
             // And, tag 7 is in sight, so we can turn toward it.
             // Override the driver's turn and fwd/rev command with an automatic one

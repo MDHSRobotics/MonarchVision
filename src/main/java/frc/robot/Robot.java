@@ -104,7 +104,7 @@ public class Robot extends TimedRobot {
     }
 
     private void readCamera(int preferredTagID) {
-                // Read in relevant data from the Camera
+        // Read in relevant data from the Camera
         boolean preferredTagFound = false;
 
         var results = camera.getAllUnreadResults();
@@ -139,7 +139,7 @@ public class Robot extends TimedRobot {
                 lastSeenRange = PhotonUtils.calculateDistanceToTargetMeters(
                                     0.5, // Measured with a tape measure, or in CAD.
                                     0.889, // From 2026 game manual for ID 7
-                                    Units.degreesToRadians(30.0), // Measured with a protractor, or in CAD.
+                                    Constants.Vision.camPitch, // Measured with a protractor, or in CAD.
                                     Units.degreesToRadians(bestTarget.getPitch()));
                 lastSeenYaw = bestTarget.getYaw();
 

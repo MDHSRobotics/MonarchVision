@@ -62,7 +62,7 @@ public class Robot extends TimedRobot {
     private int lastSeenTagID = -1;
     private double lastSeenRange = 0.0;
     private double lastSeenYaw = 0.0;
-    private boolean lastSeenIsTarget = false;
+    private boolean lastSeenIsPreferred = false;
     private double lastSeenTime = 0.0;
     private static final double TARGET_LOST_TIMEOUT_SEC = 0.25;
 
@@ -90,9 +90,6 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
 
         CommandScheduler.getInstance().run();
-
-        // Read camera related information
-        readCamera();
         
         // Update drivetrain subsystem
         drivetrain.periodic();
@@ -106,9 +103,9 @@ public class Robot extends TimedRobot {
         drivetrain.stop();
     }
 
-    private void readCamera() {
+    private void readCamera(int preferredTagID) {
                 // Read in relevant data from the Camera
-        boolean targetVisible = false;
+        boolean preferredTagFound = false;
 
         var results = camera.getAllUnreadResults();
         if (!results.isEmpty()) {
@@ -118,23 +115,26 @@ public class Robot extends TimedRobot {
             PhotonTrackedTarget bestTarget = null;
             if (result.hasTargets()) {
                 // At least one AprilTag was seen by the camera
-                for (var target : result.getTargets()) {
-                    int id = target.getFiducialId();
-                    if (id == 7) {
-                        // Found Tag 7, record its information
-                        bestTarget = target;
-                        targetVisible = true;
-                        break;
+                // If we are looking for a preferred tag, see if it was detected
+                if (preferredTagID >= 0 ) {
+                    for (var target : result.getTargets()) {
+                        int id = target.getFiducialId();
+                        if (id == preferredTagID) {
+                            // Found preferred tag
+                            bestTarget = target;
+                            preferredTagFound = true;
+                            break;
+                        }
                     }
                 }
-                if (!targetVisible) {
-                    // Found some April tags but not the target of interest
+                if (!preferredTagFound) {
+                    // Found some April tags but not the preferred tag (if any)
                     // So just report the best one found
                     bestTarget = result.getBestTarget();
-                    targetVisible = false;
+                    preferredTagFound = false;
                 }
                 lastSeenTagID = bestTarget.getFiducialId();
-                lastSeenIsTarget = targetVisible;
+                lastSeenIsPreferred = preferredTagFound;
                 lastSeenYaw = bestTarget.getYaw();
                 lastSeenRange = PhotonUtils.calculateDistanceToTargetMeters(
                                     0.5, // Measured with a tape measure, or in CAD.
@@ -149,14 +149,14 @@ public class Robot extends TimedRobot {
             boolean recentlySeen = Timer.getFPGATimestamp() - lastSeenTime < TARGET_LOST_TIMEOUT_SEC;
             if (recentlySeen) {
                 // Put debug information to the dashboard
-                SmartDashboard.putBoolean("Target Visible", lastSeenIsTarget);
+                SmartDashboard.putBoolean("Preferred Tag Visible", preferredTagFound);
                 SmartDashboard.putNumber("Detected Tag ID", lastSeenTagID);
                 SmartDashboard.putNumber("Detected Range (m)", lastSeenRange);
                 SmartDashboard.putNumber("Detected Yaw", lastSeenYaw);
 
             }
             else {
-                SmartDashboard.putBoolean("Target Visible", false);
+                SmartDashboard.putBoolean("Preferred Tag Visible", false);
                 SmartDashboard.putNumber("Detected Tag ID", -1);
                 SmartDashboard.putNumber("Detected Range (m)", 0.0);
                 SmartDashboard.putNumber("Detected Yaw", 0.0);
@@ -175,15 +175,20 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
+
         // Calculate drivetrain commands from Joystick values
         double forward = -controller.getLeftY() * Constants.Swerve.kMaxLinearSpeed;
         double strafe = -controller.getLeftX() * Constants.Swerve.kMaxLinearSpeed;
         double turn = -controller.getRightX() * Constants.Swerve.kMaxAngularSpeed;
 
+        // Read camera, looking for target to align to
+        int targetTagID = 7;
+        readCamera(targetTagID);
+
         // Auto-align when requested
-        if (controller.getAButton() && lastSeenIsTarget) {
-            // Driver wants auto-alignment to tag 7
-            // And, tag 7 is in sight, so we can turn toward it.
+        if (controller.getAButton() && lastSeenIsPreferred) {
+            // Driver wants auto-alignment to target tag
+            // And, it is in sight, so we can turn toward it.
             // Override the driver's turn and fwd/rev command with an automatic one
             // That turns toward the tag, and gets the range right.
             turn =
@@ -224,6 +229,13 @@ public class Robot extends TimedRobot {
         if (autonomousCommand != null) {
             autonomousCommand.schedule();
         }
+    }
+
+    @Override
+    public void autonomousPeriodic() {
+        // Just read camera and report tags detected as we are moving
+        int noPreferredTag = -1;
+        readCamera(noPreferredTag);
     }
 
     @Override

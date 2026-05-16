@@ -28,6 +28,8 @@ import edu.wpi.first.wpilibj.Timer;
 
 import static frc.robot.Constants.Vision.*;
 
+import java.util.List;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -44,6 +46,11 @@ import frc.robot.subsystems.drivetrain.SwerveDrive;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.targeting.PhotonPipelineResult;
+
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import edu.wpi.first.math.VecBuilder;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
@@ -59,12 +66,16 @@ public class Robot extends TimedRobot {
 
     private XboxController controller;
 
+    private List<PhotonPipelineResult> latestCameraResults = null;
     private int lastSeenTagID = -1;
     private double lastSeenRange = 0.0;
     private double lastSeenYaw = 0.0;
     private boolean lastSeenIsPreferred = false;
     private double lastSeenTime = 0.0;
     private static final double TARGET_LOST_TIMEOUT_SEC = 0.25;
+
+    // Needed to update drivetrain pose based on april tags detected
+    private PhotonPoseEstimator photonPoseEstimator;
 
     private Command autonomousCommand;
     private SendableChooser<Command> autoChooser = null;
@@ -75,6 +86,18 @@ public class Robot extends TimedRobot {
         camera = new PhotonCamera(kCameraName);
 
         visionSim = new VisionSim(camera);
+
+        // This photonPoseEstimator will be used to adjust the drivetrain pose
+        // based on detected april tags
+        photonPoseEstimator = new PhotonPoseEstimator(
+            kTagLayout,
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            kRobotToCam
+        );
+
+        photonPoseEstimator.setMultiTagFallbackStrategy(
+            PoseStrategy.LOWEST_AMBIGUITY
+        );
 
         controller = new XboxController(0);
 
@@ -107,11 +130,11 @@ public class Robot extends TimedRobot {
         // Read in relevant data from the Camera
         boolean preferredTagFound = false;
 
-        var results = camera.getAllUnreadResults();
-        if (!results.isEmpty()) {
+        latestCameraResults = camera.getAllUnreadResults();
+        if (!latestCameraResults.isEmpty()) {
             // Camera processed a new frame since last
             // Get the last one in the list.
-            var result = results.get(results.size() - 1);
+            var result = latestCameraResults.get(latestCameraResults.size() - 1);
             PhotonTrackedTarget bestTarget = null;
             if (result.hasTargets()) {
                 // At least one AprilTag was seen by the camera
@@ -183,7 +206,7 @@ public class Robot extends TimedRobot {
 
         // Read camera, looking for target to align to
         int targetTagID = 7;
-        readCamera(targetTagID);
+        //readCamera(targetTagID);
 
         // Auto-align when requested
         if (controller.getAButton() && lastSeenIsPreferred) {
@@ -235,13 +258,16 @@ public class Robot extends TimedRobot {
     public void autonomousPeriodic() {
         // Just read camera and report tags detected as we are moving
         int noPreferredTag = -1;
-        readCamera(noPreferredTag);
+        //readCamera(noPreferredTag);
     }
 
     @Override
     public void simulationPeriodic() {
         // Update drivetrain simulation
         drivetrain.simulationPeriodic();
+
+        // Update the estimated pose based on detected april tags
+        updatePoseEstimatorFromVision();
 
         // Update camera simulation
         visionSim.simulationPeriodic(drivetrain.getSimPose());
@@ -266,5 +292,47 @@ public class Robot extends TimedRobot {
         var startPose = new Pose2d(1, 1, new Rotation2d());
         drivetrain.resetPose(startPose, true);
         visionSim.resetSimPose(startPose);
+    }
+
+    private void updatePoseEstimatorFromVision() {
+
+        /*
+         * A Note about the Vision Pose determined when an april tag is detected:
+         * This isn't stored as a field — it's a momentary measurement. 
+         * When PhotonVision sees an AprilTag, it can compute the robot's full 
+         * field-relative pose using the known tag location (from the field layout)
+         * and the camera's transform. That pose estimate gets passed into:
+         *    poseEstimator.addVisionMeasurement(visionPose, timestamp);
+         * ...and is immediately blended into the estimated pose by the Kalman filter. 
+         * It's imprecise (noisy camera, uncertain tag detection) but it's absolute — 
+         * it doesn't care how far you've driven or how much the wheels have slipped.
+         * The timestamp matters a lot here — WPILib's pose estimator accepts backdated 
+         * measurements, so if the camera has 30ms of latency, you pass the timestamp 
+         * from when the frame was captured, not when it was processed. The filter 
+         * rewinds and replays to correct for that latency.
+         */
+
+        readCamera((-1));
+        
+        // Check to see if the camera has any results
+        // If so, estimate a pose based on april tags detected in the last frame
+        if (latestCameraResults != null){
+            if (latestCameraResults.size() > 0) {
+                var result = latestCameraResults.get(latestCameraResults.size() - 1);
+                
+                var visionEstimate = photonPoseEstimator.update(result);
+
+                if (visionEstimate.isPresent()) {
+                    var est = visionEstimate.get();
+
+                    // Update the estimated pose with the pose calculated by vision
+                    drivetrain.addVisionMeasurement(
+                        est.estimatedPose.toPose2d(),
+                        est.timestampSeconds,
+                        VecBuilder.fill(0.7, 0.7, 1.5)
+                    );
+                }
+            }
+        }
     }
 }

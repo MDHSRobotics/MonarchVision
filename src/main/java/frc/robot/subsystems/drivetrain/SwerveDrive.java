@@ -55,6 +55,24 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Swerve.ModuleConstants;
 import frc.robot.Robot;
 
+/*
+ *  A note about the "Estimated Pose" which is maintained here:
+ * This is what the robot thinks it is, and it's the only pose that exists on a real robot.
+ * It's maintained by WPILib's SwerveDrivePoseEstimator, which is a Kalman filter that fuses two sources:
+ *   1. Wheel odometry — updated every loop from encoder deltas and gyro heading. 
+ *      Fast and smooth, but drifts over time.
+ *   2. Vision measurements — periodically injected via addVisionMeasurement() when the camera sees 
+ *      an AprilTag. Jumpy but absolute — it doesn't drift.
+ * 
+ * The Kalman filter weights these two sources against each other based on the standard deviation
+ * parameters set at construction:
+ *    var stateStdDevs  = VecBuilder.fill(0.1, 0.1, 0.1); // trust odometry a lot
+ *    var visionStdDevs = VecBuilder.fill(1,   1,   1  ); // trust vision less
+ * Lower numbers = more trust. So here odometry is trusted 10x more than vision per update, but vision
+ * prevents long-term drift. This is what getPose() returns, and it's what PathPlanner, auto-alignment,
+ * and all driving logic use.
+ */
+
 public class SwerveDrive extends SubsystemBase{
     // Construct the swerve modules with their respective constants.
     // The SwerveModule class will handle all the details of controlling the modules.
@@ -84,6 +102,7 @@ public class SwerveDrive extends SubsystemBase{
     private final ADXRS450_GyroSim gyroSim;
     private final SwerveDriveSim swerveDriveSim;
     private double totalCurrentDraw = 0;
+
     // Simulate encoder error to mimic slip, etc. that occur in the real world
     private final double[] driveEncoderErrorMeters = new double[4]; // accumulated error per module
     private SwerveModulePosition[] lastRealPositions = new SwerveModulePosition[4];
@@ -183,7 +202,7 @@ public class SwerveDrive extends SubsystemBase{
         }
 
         // Real robots drift much more from gyro bias than wheel slip alone.
-        gyroBiasDeg += 0.005;
+        //gyroBiasDeg += 0.005;
         Rotation2d noisyYaw = getGyroYaw().plus(Rotation2d.fromDegrees(gyroBiasDeg));
         poseEstimator.update(noisyYaw, biasedPositions);
     }

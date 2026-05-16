@@ -79,7 +79,18 @@ public class SwerveDriveSim {
 
     private final Random rand = new Random();
 
-    // noiseless "actual" pose of the robot on the field
+    // Noiseless "actual" pose of the robot on the field
+    /*
+     * Sim True Pose (swerveDriveSim.getPose())
+     * This is the ground truth — the mathematically perfect position computed by the physics engine
+     * by integrating wheel velocities over time. No noise, no error. It's only accessible in simulation
+     * and represents where the robot actually is in the simulated world.
+     * It's used for exactly two things:
+     *  1. Feeding VisionSim so the fake camera sees the right AprilTags
+     *  2. Visualizing the true robot position in the debug field
+     * 
+     * Nothing in the real control loop touches this. It's purely for simulation bookkeeping.
+     */
     private Pose2d pose = new Pose2d();
     private double omegaRadsPerSec = 0;
 

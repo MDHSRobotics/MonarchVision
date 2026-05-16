@@ -24,20 +24,13 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Timer;
-
-import static frc.robot.Constants.Vision.*;
-
-import java.util.List;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -45,39 +38,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
-import org.photonvision.targeting.PhotonTrackedTarget;
-import org.photonvision.targeting.PhotonPipelineResult;
 
-import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import edu.wpi.first.math.VecBuilder;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
 public class Robot extends TimedRobot {
     private SwerveDrive drivetrain;
     private Vision vision;
-    private PhotonCamera camera;
 
-    private final double VISION_TURN_kP = 0.01;
-    private final double VISION_DES_ANGLE_deg = 0.0;
-    private final double VISION_STRAFE_kP = 0.5;
-    private final double VISION_DES_RANGE_m = 1.25;
+    private final double TURN_kP = 0.01;
+    private static final double TURN_SPEED_SCALE = 0.25;
 
-    private XboxController controller;
-
-    private List<PhotonPipelineResult> latestCameraResults = null;
-    private int lastSeenTagID = -1;
-    private double lastSeenRange = 0.0;
-    private double lastSeenYaw = 0.0;
-    private boolean lastSeenIsPreferred = false;
-    private double lastSeenTime = 0.0;
-    private static final double TARGET_LOST_TIMEOUT_SEC = 0.25;
-
-    // Needed to update drivetrain pose based on april tags detected
-    private PhotonPoseEstimator photonPoseEstimator;
+    private PS4Controller controller;
 
     private Command autonomousCommand;
     private SendableChooser<Command> autoChooser = null;
@@ -88,7 +60,7 @@ public class Robot extends TimedRobot {
 
         vision = new Vision(drivetrain::addVisionMeasurement);
 
-        controller = new XboxController(0);
+        controller = new PS4Controller(0);
 
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -112,7 +84,7 @@ public class Robot extends TimedRobot {
         // Test/Example only!
         // Apply an offset to pose estimator to test vision correction
         // You probably don't want this on a real robot, just delete it.
-        if (controller.getBButtonPressed()) {
+        if (controller.getCrossButtonPressed()) {
             var disturbance =
                     new Transform2d(new Translation2d(1.0, 1.0), new Rotation2d(0.17 * 2 * Math.PI));
             drivetrain.resetPose(drivetrain.getPose().plus(disturbance), false);
@@ -139,9 +111,20 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
 
         // Calculate drivetrain commands from Joystick values
-        double forward = -controller.getLeftY() * Constants.Swerve.kMaxLinearSpeed;
-        double strafe = -controller.getLeftX() * Constants.Swerve.kMaxLinearSpeed;
-        double turn = -controller.getRightX() * Constants.Swerve.kMaxAngularSpeed;
+
+        double forward = MathUtil.applyDeadband(-controller.getLeftY(), 0.08); // Down/UP
+        double strafe  = MathUtil.applyDeadband(-controller.getLeftX(), 0.08); // Left/Right
+        double turn    = MathUtil.applyDeadband(-controller.getRightX(), 0.08);  // Rotate
+
+        // smooth response
+        forward = forward * forward * forward;
+        strafe  = strafe * strafe * strafe;
+        turn    = turn * turn * turn;
+
+        // scale to robot max speeds
+        forward *= Constants.Swerve.kMaxLinearSpeed;
+        strafe  *= Constants.Swerve.kMaxLinearSpeed;
+        turn    *= Constants.Swerve.kMaxAngularSpeed * TURN_SPEED_SCALE;
 
         // Calculate whether close to target based on our global pose estimate.
         var curPose = drivetrain.getPose();
@@ -160,7 +143,7 @@ public class Robot extends TimedRobot {
                 180.0
             );
 
-            turn = errorDeg * VISION_TURN_kP * Constants.Swerve.kMaxAngularSpeed;
+            turn = errorDeg * TURN_kP * Constants.Swerve.kMaxAngularSpeed;
             forward = 0.0;
             strafe = 0.0;
         }

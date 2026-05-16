@@ -33,6 +33,8 @@ import java.util.List;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -56,7 +58,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 public class Robot extends TimedRobot {
     private SwerveDrive drivetrain;
-    private VisionSim visionSim;
+    private Vision vision;
     private PhotonCamera camera;
 
     private final double VISION_TURN_kP = 0.01;
@@ -83,21 +85,8 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         drivetrain = new SwerveDrive();
-        camera = new PhotonCamera(kCameraName);
 
-        visionSim = new VisionSim(camera);
-
-        // This photonPoseEstimator will be used to adjust the drivetrain pose
-        // based on detected april tags
-        photonPoseEstimator = new PhotonPoseEstimator(
-            kTagLayout,
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            kRobotToCam
-        );
-
-        photonPoseEstimator.setMultiTagFallbackStrategy(
-            PoseStrategy.LOWEST_AMBIGUITY
-        );
+        vision = new Vision(drivetrain::addVisionMeasurement);
 
         controller = new XboxController(0);
 
@@ -117,6 +106,18 @@ public class Robot extends TimedRobot {
         // Update drivetrain subsystem
         drivetrain.periodic();
 
+        // Update vision
+        vision.periodic();
+
+        // Test/Example only!
+        // Apply an offset to pose estimator to test vision correction
+        // You probably don't want this on a real robot, just delete it.
+        if (controller.getBButtonPressed()) {
+            var disturbance =
+                    new Transform2d(new Translation2d(1.0, 1.0), new Rotation2d(0.17 * 2 * Math.PI));
+            drivetrain.resetPose(drivetrain.getPose().plus(disturbance), false);
+        }
+
         // Log values to the dashboard
         drivetrain.log();
     }
@@ -124,68 +125,6 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         drivetrain.stop();
-    }
-
-    private void readCamera(int preferredTagID) {
-        // Read in relevant data from the Camera
-        boolean preferredTagFound = false;
-
-        latestCameraResults = camera.getAllUnreadResults();
-        if (!latestCameraResults.isEmpty()) {
-            // Camera processed a new frame since last
-            // Get the last one in the list.
-            var result = latestCameraResults.get(latestCameraResults.size() - 1);
-            PhotonTrackedTarget bestTarget = null;
-            if (result.hasTargets()) {
-                // At least one AprilTag was seen by the camera
-                // If we are looking for a preferred tag, see if it was detected
-                if (preferredTagID >= 0 ) {
-                    for (var target : result.getTargets()) {
-                        int id = target.getFiducialId();
-                        if (id == preferredTagID) {
-                            // Found preferred tag
-                            bestTarget = target;
-                            preferredTagFound = true;
-                            break;
-                        }
-                    }
-                }
-                if (!preferredTagFound) {
-                    // Found some April tags but not the preferred tag (if any)
-                    // So just report the best one found
-                    bestTarget = result.getBestTarget();
-                    preferredTagFound = false;
-                }
-                lastSeenTagID = bestTarget.getFiducialId();
-                lastSeenIsPreferred = preferredTagFound;
-                lastSeenYaw = bestTarget.getYaw();
-                lastSeenRange = PhotonUtils.calculateDistanceToTargetMeters(
-                                    0.5, // Measured with a tape measure, or in CAD.
-                                    0.889, // From 2026 game manual for ID 7
-                                    Constants.Vision.camPitch, // Measured with a protractor, or in CAD.
-                                    Units.degreesToRadians(bestTarget.getPitch()));
-                lastSeenYaw = bestTarget.getYaw();
-
-                lastSeenTime = Timer.getFPGATimestamp();
-            }
-            
-            boolean recentlySeen = Timer.getFPGATimestamp() - lastSeenTime < TARGET_LOST_TIMEOUT_SEC;
-            if (recentlySeen) {
-                // Put debug information to the dashboard
-                SmartDashboard.putBoolean("Preferred Tag Visible", preferredTagFound);
-                SmartDashboard.putNumber("Detected Tag ID", lastSeenTagID);
-                SmartDashboard.putNumber("Detected Range (m)", lastSeenRange);
-                SmartDashboard.putNumber("Detected Yaw", lastSeenYaw);
-
-            }
-            else {
-                SmartDashboard.putBoolean("Preferred Tag Visible", false);
-                SmartDashboard.putNumber("Detected Tag ID", -1);
-                SmartDashboard.putNumber("Detected Range (m)", 0.0);
-                SmartDashboard.putNumber("Detected Yaw", 0.0);
-
-            }  
-        }
     }
 
     @Override
@@ -204,21 +143,10 @@ public class Robot extends TimedRobot {
         double strafe = -controller.getLeftX() * Constants.Swerve.kMaxLinearSpeed;
         double turn = -controller.getRightX() * Constants.Swerve.kMaxAngularSpeed;
 
-        // Read camera, looking for target to align to
-        int targetTagID = 7;
-        //readCamera(targetTagID);
-
-        // Auto-align when requested
-        if (controller.getAButton() && lastSeenIsPreferred) {
-            // Driver wants auto-alignment to target tag
-            // And, it is in sight, so we can turn toward it.
-            // Override the driver's turn and fwd/rev command with an automatic one
-            // That turns toward the tag, and gets the range right.
-            turn =
-                    (VISION_DES_ANGLE_deg - lastSeenYaw) * VISION_TURN_kP * Constants.Swerve.kMaxAngularSpeed;
-            forward =
-                    (VISION_DES_RANGE_m - lastSeenRange) * VISION_STRAFE_kP * Constants.Swerve.kMaxLinearSpeed;
-        }
+        // Calculate whether close to target based on our global pose estimate.
+        var curPose = drivetrain.getPose();
+        var closeToTarget = (curPose.getY() > 2.0 && curPose.getX() < 4.0); // Close enough to blue speaker
+        SmartDashboard.putBoolean("Close to Target", closeToTarget);
 
         // Orient robot based on POV buttons
         int pov = controller.getPOV();
@@ -256,9 +184,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousPeriodic() {
-        // Just read camera and report tags detected as we are moving
-        int noPreferredTag = -1;
-        //readCamera(noPreferredTag);
+
     }
 
     @Override
@@ -266,13 +192,10 @@ public class Robot extends TimedRobot {
         // Update drivetrain simulation
         drivetrain.simulationPeriodic();
 
-        // Update the estimated pose based on detected april tags
-        updatePoseEstimatorFromVision();
-
         // Update camera simulation
-        visionSim.simulationPeriodic(drivetrain.getSimPose());
+        vision.simulationPeriodic(drivetrain.getSimPose());
 
-        var debugField = visionSim.getSimDebugField();
+        var debugField = vision.getSimDebugField();
         debugField.getObject("EstimatedRobot").setPose(drivetrain.getPose());
         debugField.getObject("EstimatedRobotModules").setPoses(drivetrain.getModulePoses());
 
@@ -291,48 +214,7 @@ public class Robot extends TimedRobot {
         // The first pose in an autonomous path is often a good choice.
         var startPose = new Pose2d(1, 1, new Rotation2d());
         drivetrain.resetPose(startPose, true);
-        visionSim.resetSimPose(startPose);
+        vision.resetSimPose(startPose);
     }
 
-    private void updatePoseEstimatorFromVision() {
-
-        /*
-         * A Note about the Vision Pose determined when an april tag is detected:
-         * This isn't stored as a field — it's a momentary measurement. 
-         * When PhotonVision sees an AprilTag, it can compute the robot's full 
-         * field-relative pose using the known tag location (from the field layout)
-         * and the camera's transform. That pose estimate gets passed into:
-         *    poseEstimator.addVisionMeasurement(visionPose, timestamp);
-         * ...and is immediately blended into the estimated pose by the Kalman filter. 
-         * It's imprecise (noisy camera, uncertain tag detection) but it's absolute — 
-         * it doesn't care how far you've driven or how much the wheels have slipped.
-         * The timestamp matters a lot here — WPILib's pose estimator accepts backdated 
-         * measurements, so if the camera has 30ms of latency, you pass the timestamp 
-         * from when the frame was captured, not when it was processed. The filter 
-         * rewinds and replays to correct for that latency.
-         */
-
-        readCamera((-1));
-        
-        // Check to see if the camera has any results
-        // If so, estimate a pose based on april tags detected in the last frame
-        if (latestCameraResults != null){
-            if (latestCameraResults.size() > 0) {
-                var result = latestCameraResults.get(latestCameraResults.size() - 1);
-                
-                var visionEstimate = photonPoseEstimator.update(result);
-
-                if (visionEstimate.isPresent()) {
-                    var est = visionEstimate.get();
-
-                    // Update the estimated pose with the pose calculated by vision
-                    drivetrain.addVisionMeasurement(
-                        est.estimatedPose.toPose2d(),
-                        est.timestampSeconds,
-                        VecBuilder.fill(0.7, 0.7, 1.5)
-                    );
-                }
-            }
-        }
-    }
 }

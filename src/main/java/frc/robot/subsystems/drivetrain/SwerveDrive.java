@@ -26,6 +26,8 @@ package frc.robot.subsystems.drivetrain;
 
 import static frc.robot.Constants.Swerve.*;
 
+import java.util.Random;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -82,6 +84,12 @@ public class SwerveDrive extends SubsystemBase{
     private final ADXRS450_GyroSim gyroSim;
     private final SwerveDriveSim swerveDriveSim;
     private double totalCurrentDraw = 0;
+    // Simulate encoder error to mimic slip, etc. that occur in the real world
+    private final double[] driveEncoderErrorMeters = new double[4]; // accumulated error per module
+    private SwerveModulePosition[] lastRealPositions = new SwerveModulePosition[4];
+    private static final double DRIVE_SLIP_ERROR_PER_METER = 0.01; // (1% slip per meter traveled).
+    private final Random rand = new Random();
+    private double gyroBiasDeg = 0.0;
 
     public SwerveDrive() {
         // Define the standard deviations for the pose estimator, which determine how fast the pose
@@ -111,6 +119,9 @@ public class SwerveDrive extends SubsystemBase{
                         DCMotor.getFalcon500(1),
                         kSteerGearRatio,
                         kinematics);
+        for (int i = 0; i < swerveMods.length; i++) {
+            lastRealPositions[i] = new SwerveModulePosition();
+        }
 
         // ---- PathPlanner
         try {
@@ -135,12 +146,46 @@ public class SwerveDrive extends SubsystemBase{
     }
 
     public void periodic() {
+
         for (SwerveModule module : swerveMods) {
             module.periodic();
         }
 
-        // Update the odometry of the swerve drive using the wheel encoders and gyro.
-        poseEstimator.update(getGyroYaw(), getModulePositions());
+        // Update the odometry of the swerve drive using the wheel encoders and gyro
+        // Simulate encoder and gyro inaccuracies
+        SwerveModulePosition[] biasedPositions = new SwerveModulePosition[4];
+
+        SwerveModulePosition[] realPositions = swerveDriveSim.getModulePositions();
+        for (int i = 0; i < swerveMods.length; i++) {
+            // How much did the wheel move this tick?
+            double delta = realPositions[i].distanceMeters - lastRealPositions[i].distanceMeters;
+
+            // Accumulate a random error proportional to distance traveled (not displacement)
+            double slipNoise = rand.nextGaussian()  * DRIVE_SLIP_ERROR_PER_METER * Math.abs(delta);
+            driveEncoderErrorMeters[i] += slipNoise;
+
+            // Add a small systematic bias on top of the random walk to simulate a wheel that's 
+            // consistently slightly smaller than spec — this causes slow drift in one direction
+            // even without randomness
+            driveEncoderErrorMeters[i] += 0.002 * Math.abs(delta);
+
+            biasedPositions[i] = new SwerveModulePosition(
+                realPositions[i].distanceMeters + driveEncoderErrorMeters[i],
+                realPositions[i].angle
+            );
+
+            // save for next tick
+            lastRealPositions[i] =
+                new SwerveModulePosition(
+                    realPositions[i].distanceMeters,
+                    realPositions[i].angle
+                );
+        }
+
+        // Real robots drift much more from gyro bias than wheel slip alone.
+        gyroBiasDeg += 0.005;
+        Rotation2d noisyYaw = getGyroYaw().plus(Rotation2d.fromDegrees(gyroBiasDeg));
+        poseEstimator.update(noisyYaw, biasedPositions);
     }
 
     /**
@@ -221,6 +266,13 @@ public class SwerveDrive extends SubsystemBase{
             }
             gyroSim.setAngle(-pose.getRotation().getDegrees());
             gyroSim.setRate(0);
+
+            // Reset the accumulated errors
+            for (int i = 0; i < swerveMods.length; i++) {
+                driveEncoderErrorMeters[i] = 0.0;
+            }
+            gyroBiasDeg = 0.0;
+
         }
 
         poseEstimator.resetPosition(getGyroYaw(), getModulePositions(), pose);

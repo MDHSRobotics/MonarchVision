@@ -90,6 +90,11 @@ public class Robot extends TimedRobot {
             drivetrain.resetPose(drivetrain.getPose().plus(disturbance), false);
         }
 
+        // Reset pose
+        if (controller.getCircleButtonPressed()) {
+            resetPose();
+        }
+
         // Log values to the dashboard
         drivetrain.log();
     }
@@ -104,7 +109,6 @@ public class Robot extends TimedRobot {
         if (autonomousCommand != null) {
             autonomousCommand.cancel();
         }
-        resetPose();
     }
 
     @Override

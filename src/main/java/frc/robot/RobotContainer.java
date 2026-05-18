@@ -11,7 +11,9 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -32,6 +34,8 @@ public class RobotContainer {
 
   private final DemoDrive drive = new DemoDrive(); // Demo drive subsystem, sim only
   private final CommandGenericHID keyboard = new CommandGenericHID(0); // Keyboard 0 on port 0
+  private PS4Controller controller;
+  private SendableChooser<Command> autoChooser = null;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -67,7 +71,12 @@ public class RobotContainer {
     }
 
     // Configure the button bindings
+    controller = new PS4Controller(0);
     configureButtonBindings();
+
+    // Create autocommand chooser in SmartDashboard
+    // autoChooser = AutoBuilder.buildAutoChooser();
+    // SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   /**
@@ -108,6 +117,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return Commands.none();
+    return autoChooser.getSelected();
   }
 }

@@ -1,207 +1,149 @@
-/*
- * MIT License
- *
- * Copyright (c) PhotonVision
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// Copyright (c) 2021-2026 Littleton Robotics
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
 
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.PS4Controller;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.drivetrain.SwerveDrive;
+import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+/**
+ * The VM is configured to automatically run this class, and to call the functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the name of this class or
+ * the package after creating this project, you must also update the build.gradle file in the
+ * project.
+ */
+public class Robot extends LoggedRobot {
+  private Command autonomousCommand;
+  private RobotContainer robotContainer;
 
-import com.pathplanner.lib.auto.AutoBuilder;
+  public Robot() {
+    // Record metadata
+    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
+    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
+    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
+    Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
+    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+    Logger.recordMetadata(
+        "GitDirty",
+        switch (BuildConstants.DIRTY) {
+          case 0 -> "All changes committed";
+          case 1 -> "Uncommitted changes";
+          default -> "Unknown";
+        });
 
-public class Robot extends TimedRobot {
-    private SwerveDrive drivetrain;
-    private Vision vision;
+    // Set up data receivers & replay source
+    switch (Constants.currentMode) {
+      case REAL:
+        // Running on a real robot, log to a USB stick ("/U/logs")
+        Logger.addDataReceiver(new WPILOGWriter());
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
 
-    private final double TURN_kP = 0.01;
-    private static final double TURN_SPEED_SCALE = 0.25;
+      case SIM:
+        // Running a physics simulator, log to NT
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
 
-    private PS4Controller controller;
-
-    private Command autonomousCommand;
-    private SendableChooser<Command> autoChooser = null;
-
-    @Override
-    public void robotInit() {
-        drivetrain = new SwerveDrive();
-
-        vision = new Vision(drivetrain::addVisionMeasurement);
-
-        controller = new PS4Controller(0);
-
-        autoChooser = AutoBuilder.buildAutoChooser();
-        SmartDashboard.putData("Auto Chooser", autoChooser);
+      case REPLAY:
+        // Replaying a log, set up replay source
+        setUseTiming(false); // Run as fast as possible
+        String logPath = LogFileUtil.findReplayLog();
+        Logger.setReplaySource(new WPILOGReader(logPath));
+        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+        break;
     }
 
-    public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+    // Start AdvantageKit logger
+    Logger.start();
+
+    // Instantiate our RobotContainer. This will perform all our button bindings,
+    // and put our autonomous chooser on the dashboard.
+    robotContainer = new RobotContainer();
+  }
+
+  /** This function is called periodically during all modes. */
+  @Override
+  public void robotPeriodic() {
+    // Optionally switch the thread to high priority to improve loop
+    // timing (see the template project documentation for details)
+    // Threads.setCurrentThreadPriority(true, 99);
+
+    // Runs the Scheduler. This is responsible for polling buttons, adding
+    // newly-scheduled commands, running already-scheduled commands, removing
+    // finished or interrupted commands, and running subsystem periodic() methods.
+    // This must be called from the robot's periodic block in order for anything in
+    // the Command-based framework to work.
+    CommandScheduler.getInstance().run();
+
+    // Return to non-RT thread priority (do not modify the first argument)
+    // Threads.setCurrentThreadPriority(false, 10);
+  }
+
+  /** This function is called once when the robot is disabled. */
+  @Override
+  public void disabledInit() {}
+
+  /** This function is called periodically when disabled. */
+  @Override
+  public void disabledPeriodic() {}
+
+  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  @Override
+  public void autonomousInit() {
+    autonomousCommand = robotContainer.getAutonomousCommand();
+
+    // schedule the autonomous command (example)
+    if (autonomousCommand != null) {
+      CommandScheduler.getInstance().schedule(autonomousCommand);
     }
+  }
 
-    @Override
-    public void robotPeriodic() {
+  /** This function is called periodically during autonomous. */
+  @Override
+  public void autonomousPeriodic() {}
 
-        CommandScheduler.getInstance().run();
-        
-        // Update drivetrain subsystem
-        drivetrain.periodic();
-
-        // Update vision
-        vision.periodic();
-
-        // Test/Example only!
-        // Apply an offset to pose estimator to test vision correction
-        // You probably don't want this on a real robot, just delete it.
-        if (controller.getCrossButtonPressed()) {
-            var disturbance =
-                    new Transform2d(new Translation2d(1.0, 1.0), new Rotation2d(0.17 * 2 * Math.PI));
-            drivetrain.resetPose(drivetrain.getPose().plus(disturbance), false);
-        }
-
-        // Reset pose
-        if (controller.getCircleButtonPressed()) {
-            resetPose();
-        }
-
-        // Log values to the dashboard
-        drivetrain.log();
+  /** This function is called once when teleop is enabled. */
+  @Override
+  public void teleopInit() {
+    // This makes sure that the autonomous stops running when
+    // teleop starts running. If you want the autonomous to
+    // continue until interrupted by another command, remove
+    // this line or comment it out.
+    if (autonomousCommand != null) {
+      autonomousCommand.cancel();
     }
+  }
 
-    @Override
-    public void disabledPeriodic() {
-        drivetrain.stop();
-    }
+  /** This function is called periodically during operator control. */
+  @Override
+  public void teleopPeriodic() {}
 
-    @Override
-    public void teleopInit() {
-        if (autonomousCommand != null) {
-            autonomousCommand.cancel();
-        }
-    }
+  /** This function is called once when test mode is enabled. */
+  @Override
+  public void testInit() {
+    // Cancels all running commands at the start of test mode.
+    CommandScheduler.getInstance().cancelAll();
+  }
 
-    @Override
-    public void teleopPeriodic() {
+  /** This function is called periodically during test mode. */
+  @Override
+  public void testPeriodic() {}
 
-        // Calculate drivetrain commands from Joystick values
+  /** This function is called once when the robot is first started up. */
+  @Override
+  public void simulationInit() {}
 
-        double forward = MathUtil.applyDeadband(-controller.getLeftY(), 0.08); // Down/UP
-        double strafe  = MathUtil.applyDeadband(-controller.getLeftX(), 0.08); // Left/Right
-        double turn    = MathUtil.applyDeadband(-controller.getRightX(), 0.08);  // Rotate
-
-        // smooth response
-        forward = forward * forward * forward;
-        strafe  = strafe * strafe * strafe;
-        turn    = turn * turn * turn;
-
-        // scale to robot max speeds
-        forward *= Constants.Swerve.kMaxLinearSpeed;
-        strafe  *= Constants.Swerve.kMaxLinearSpeed;
-        turn    *= Constants.Swerve.kMaxAngularSpeed * TURN_SPEED_SCALE;
-
-        // Calculate whether close to target based on our global pose estimate.
-        var curPose = drivetrain.getPose();
-        var closeToTarget = (curPose.getY() > 2.0 && curPose.getX() < 4.0); // Close enough to blue speaker
-        SmartDashboard.putBoolean("Close to Target", closeToTarget);
-
-        // Orient robot based on POV buttons
-        int pov = controller.getPOV();
-        if (pov != -1) {
-            double targetHeadingDeg = pov;
-            double currentHeadingDeg = drivetrain.getPose().getRotation().getDegrees();
-
-            double errorDeg = MathUtil.inputModulus(
-                targetHeadingDeg - currentHeadingDeg,
-                -180.0,
-                180.0
-            );
-
-            turn = errorDeg * TURN_kP * Constants.Swerve.kMaxAngularSpeed;
-            forward = 0.0;
-            strafe = 0.0;
-        }
-
-        // Command drivetrain motors based on target speeds
-        //if (forward > 0.01) System.out.println("Forward = "+forward);
-        //if (turn > 0.01) System.out.println("Turn = "+turn);
-        //if (strafe > 0.01) System.out.println("Strafe = "+strafe);
-        drivetrain.drive(forward, strafe, turn);
-
-    }
-
-    @Override
-    public void autonomousInit() {
-        autonomousCommand = getAutonomousCommand();
-
-        if (autonomousCommand != null) {
-            autonomousCommand.schedule();
-        }
-    }
-
-    @Override
-    public void autonomousPeriodic() {
-
-    }
-
-    @Override
-    public void simulationPeriodic() {
-        // Update drivetrain simulation
-        drivetrain.simulationPeriodic();
-
-        // Update camera simulation
-        vision.simulationPeriodic(drivetrain.getSimPose());
-
-        var debugField = vision.getSimDebugField();
-        debugField.getObject("EstimatedRobot").setPose(drivetrain.getPose());
-        debugField.getObject("EstimatedRobotModules").setPoses(drivetrain.getModulePoses());
-
-        // Calculate battery voltage sag due to current draw
-        var batteryVoltage =
-                BatterySim.calculateDefaultBatteryLoadedVoltage(drivetrain.getCurrentDraw());
-
-        // Using max(0.1, voltage) here isn't a *physically correct* solution,
-        // but it avoids problems with battery voltage measuring 0.
-        RoboRioSim.setVInVoltage(Math.max(0.1, batteryVoltage));
-    }
-
-    public void resetPose() {
-        // Example Only - startPose should be derived from some assumption
-        // of where your robot was placed on the field.
-        // The first pose in an autonomous path is often a good choice.
-        var startPose = new Pose2d(1, 1, new Rotation2d());
-        drivetrain.resetPose(startPose, true);
-        vision.resetSimPose(startPose);
-    }
-
+  /** This function is called periodically whilst in simulation. */
+  @Override
+  public void simulationPeriodic() {}
 }

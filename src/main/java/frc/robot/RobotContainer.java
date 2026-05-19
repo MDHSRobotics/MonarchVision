@@ -10,13 +10,16 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -44,8 +47,8 @@ public class RobotContainer {
   private final Vision vision;
 
   // Controller
-  // private final PS4Controller controller = new PS4Controller(0);
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandPS4Controller controller = new CommandPS4Controller(0);
+  // private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -156,6 +159,15 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
+  /*
+   * Smooth joystick input by applying a deadband and then cubing the value
+   */
+  static double smoothInput(double inValue) {
+    double outValue = MathUtil.applyDeadband(inValue, 0.08);
+    outValue = outValue * outValue * outValue;
+    return outValue;
+  }
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -167,32 +179,55 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> smoothInput(-controller.getLeftY()),
+            () -> smoothInput(-controller.getLeftX()),
+            () -> smoothInput(-controller.getRightX())));
 
-    // Lock to 0° when A button is held
+    // Lock to 0°
     controller
-        .a()
+        .square()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                () -> smoothInput(-controller.getLeftY()),
+                () -> smoothInput(-controller.getLeftX()),
                 () -> Rotation2d.kZero));
 
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // Switch to X pattern
+    controller.cross().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
+    // Reset gyro to 0°
     controller
-        .b()
-        .onTrue(
+        .circle()
+        .whileTrue(
             Commands.runOnce(
                     () ->
                         drive.setPose(
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
+                .ignoringDisable(true));
+
+    // Test/Example for Simulation purposes only!
+    // Apply an offset to pose estimator to test vision correction
+    // You probably don't want this on a real robot so just enable in Simulation
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      controller
+          .L1()
+          .whileTrue(
+              Commands.runOnce(
+                  () -> {
+                    var disturbance =
+                        new Transform2d(
+                            new Translation2d(1.0, 1.0), new Rotation2d(0.17 * 2 * Math.PI));
+                    drive.setPose(drive.getPose().plus(disturbance));
+                  }));
+    }
+
+    // Reset pose
+    controller
+        .L2()
+        .whileTrue(
+            Commands.runOnce(() -> drive.setPose(new Pose2d(1., 1., Rotation2d.kZero)), drive)
                 .ignoringDisable(true));
   }
 

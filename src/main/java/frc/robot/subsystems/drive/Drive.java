@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -97,6 +98,8 @@ public class Drive extends SubsystemBase {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
+
+  private Pose2d lastPose = new Pose2d(Translation2d.kZero, Rotation2d.kZero);
 
   public Drive(
       GyroIO gyroIO,
@@ -315,7 +318,22 @@ public class Drive extends SubsystemBase {
   /** Returns the current odometry pose. */
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
-    return poseEstimator.getEstimatedPosition();
+
+    Pose2d newPose = poseEstimator.getEstimatedPosition();
+
+    // Debugging stuff
+    if (RobotBase.isSimulation()) {
+      double poseOffset = newPose.getTranslation().getDistance(lastPose.getTranslation());
+      if (poseOffset > .2) {
+        System.out.println("Jump in odometry of " + poseOffset + " meters");
+      }
+      lastPose = newPose;
+      if (poseOffset > 0.0) {
+        Logger.recordOutput("Debug/PoseOffset", poseOffset);
+      }
+    }
+
+    return newPose;
   }
 
   /** Returns the current odometry rotation. */

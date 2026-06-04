@@ -52,6 +52,8 @@ public class Robot extends LoggedRobot {
       case SIM:
         // Running a physics simulator, log to NT
         Logger.addDataReceiver(new NT4Publisher());
+        // Also log to the file system so that we can replay even Simulation sessions
+        Logger.addDataReceiver(new WPILOGWriter());
         break;
 
       case REPLAY:

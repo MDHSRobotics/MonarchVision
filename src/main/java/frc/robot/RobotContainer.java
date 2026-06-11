@@ -10,7 +10,6 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -159,15 +158,6 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
-  /*
-   * Smooth joystick input by applying a deadband and then cubing the value
-   */
-  static double smoothInput(double inValue) {
-    double outValue = MathUtil.applyDeadband(inValue, 0.08);
-    outValue = outValue * outValue * outValue;
-    return outValue;
-  }
-
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -179,9 +169,9 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> smoothInput(-controller.getLeftY()),
-            () -> smoothInput(-controller.getLeftX()),
-            () -> smoothInput(-controller.getRightX())));
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -controller.getRightX()));
 
     // Lock to 0°
     controller
@@ -189,8 +179,8 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> smoothInput(-controller.getLeftY()),
-                () -> smoothInput(-controller.getLeftX()),
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
                 () -> Rotation2d.kZero));
 
     // Switch to X pattern

@@ -28,7 +28,12 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.vision.ObjectTracker;
+import frc.robot.subsystems.vision.ObjectVision;
+import frc.robot.subsystems.vision.ObjectVisionIO;
+import frc.robot.subsystems.vision.ObjectVisionIOPhotonVision;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
@@ -44,6 +49,8 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vision;
+  private final ObjectVision objectVision;
+  private final ObjectTracker objectTracker;
 
   // Controller
   private final CommandPS4Controller controller = new CommandPS4Controller(0);
@@ -97,6 +104,7 @@ public class RobotContainer {
         // new VisionIOPhotonVision(camera0Name, robotToCamera0),
         // new VisionIOPhotonVision(camera1Name, robotToCamera1));
 
+        objectVision = new ObjectVision(new ObjectVisionIO() {});
         break;
 
       case SIM:
@@ -116,6 +124,22 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
 
+        if (VisionConstants.rubikInTheLoop) {
+          // We are running simulation but with a real Rubik Pi3 and camera processed by
+          // PhotonVision
+
+          objectVision =
+              new ObjectVision(
+                  new ObjectVisionIOPhotonVision(
+                      VisionConstants.rubikCameraName,
+                      robotToObjectCamera,
+                      drive::getPose,
+                      0.0)); // object height (meters)
+        } else {
+
+          objectVision = new ObjectVision(new ObjectVisionIO() {});
+        }
+
         break;
 
       default:
@@ -132,8 +156,13 @@ public class RobotContainer {
 
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
 
+        objectVision = new ObjectVision(new ObjectVisionIO() {});
+
         break;
     }
+
+    // Setup Object tracker
+    objectTracker = new ObjectTracker(objectVision);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());

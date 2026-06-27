@@ -20,8 +20,8 @@ import org.photonvision.PhotonCamera;
 
 /** IO implementation for real PhotonVision hardware. */
 public class VisionIOPhotonVision implements VisionIO {
-  protected final PhotonCamera camera;
-  protected final Transform3d robotToCamera;
+  protected final PhotonCamera camera; // Name of camera defined in PhontonVision dashboard
+  protected final Transform3d robotToCamera; // Position and orientation of camera relative to robot
 
   /**
    * Creates a new VisionIOPhotonVision.

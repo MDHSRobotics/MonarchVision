@@ -24,8 +24,8 @@ public interface ObjectVisionIO {
       Rotation2d tx, // Yaw
       Rotation2d ty, // Pitch
       double area, // % Area of the frame occupied by the object
-      Pose3d fieldPose, // Pose of the object relative to the field
-      Pose3d robotRelativePose) // Pose of the object relative to the robot
+      Pose3d robotRelativePose, // Pose of the object relative to the robot
+      Pose3d fieldPose) // Pose of the object relative to the field
   {}
 
   /**

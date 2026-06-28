@@ -7,6 +7,9 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -29,4 +32,9 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  // By making the robot 24 inches square, it will match one of the predefined sizes
+  // for the AdvantageScope robot on the 2D field
+  public static final double robotLengthInMeters = Units.inchesToMeters(24.);
+  public static final double robotWidthInMeters = Units.inchesToMeters(24.);
 }

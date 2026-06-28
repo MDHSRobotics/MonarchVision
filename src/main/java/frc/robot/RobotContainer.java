@@ -30,10 +30,10 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.ObjectTracker;
 import frc.robot.subsystems.vision.ObjectVision;
+import frc.robot.subsystems.vision.ObjectVisionConstants;
 import frc.robot.subsystems.vision.ObjectVisionIO;
 import frc.robot.subsystems.vision.ObjectVisionIOPhotonVision;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
@@ -124,17 +124,19 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
 
-        if (VisionConstants.rubikInTheLoop) {
+        if (ObjectVisionConstants.objectCameraInTheLoop) {
           // We are running simulation but with a real Rubik Pi3 and camera processed by
           // PhotonVision
 
           objectVision =
               new ObjectVision(
                   new ObjectVisionIOPhotonVision(
-                      VisionConstants.rubikCameraName,
-                      robotToObjectCamera,
+                      ObjectVisionConstants.objectCameraName,
+                      ObjectVisionConstants.robotToObjectCamera,
                       drive::getPose,
-                      0.0)); // object height (meters)
+                      ObjectVisionConstants.fuelDiameterInMeters
+                          / 2.0)); // Raise the ball by its radius so its bottom is on the floor
+          // (meters)
         } else {
 
           objectVision = new ObjectVision(new ObjectVisionIO() {});

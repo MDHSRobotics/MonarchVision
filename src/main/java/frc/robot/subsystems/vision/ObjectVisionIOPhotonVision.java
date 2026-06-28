@@ -99,33 +99,35 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
   private Pose3d estimateRobotRelativeObjectPose(
       Rotation2d tx, Rotation2d ty, double objectHeightMeters) {
 
-    Pose3d robotPose = Pose3d.kZero;
-    Pose3d cameraPose = robotPose.transformBy(robotToCamera);
+    Pose3d cameraPose = Pose3d.kZero.transformBy(robotToCamera);
 
-    double cameraHeight = cameraPose.getZ();
-    double targetHeightDelta = objectHeightMeters - cameraHeight;
+    // PhotonVision yaw is usually positive to the left in image/target terms,
+    // while WPILib +Y is left. If this is reversed in testing, flip this sign.
+    Rotation3d targetRotation =
+        new Rotation3d(
+            0.0,
+            -ty.getRadians(), // pitch down should point toward floor
+            -tx.getRadians());
 
-    Rotation3d cameraRotation = cameraPose.getRotation();
+    Translation3d rayCameraFrame = new Translation3d(1.0, targetRotation);
 
-    /*
-     * PhotonVision yaw/pitch are angles from the camera centerline.
-     * This creates a ray in the camera frame, then rotates it into the robot frame.
-     */
-    Translation3d rayCameraFrame =
-        new Translation3d(1.0, Math.tan(tx.getRadians()), Math.tan(ty.getRadians()));
+    Translation3d rayRobotFrame = rayCameraFrame.rotateBy(cameraPose.getRotation());
 
-    Translation3d rayRobotFrame = rayCameraFrame.rotateBy(cameraRotation);
-
-    if (Math.abs(rayRobotFrame.getZ()) < 1e-6) {
+    double dz = rayRobotFrame.getZ();
+    if (Math.abs(dz) < 1e-6) {
       return Pose3d.kZero;
     }
 
-    double scale = targetHeightDelta / rayRobotFrame.getZ();
+    double scale = (objectHeightMeters - cameraPose.getZ()) / dz;
+
+    if (scale < 0.0) {
+      return Pose3d.kZero;
+    }
 
     Translation3d robotToObjectTranslation =
         cameraPose.getTranslation().plus(rayRobotFrame.times(scale));
 
-    return new Pose3d(robotToObjectTranslation, new Rotation3d());
+    return new Pose3d(robotToObjectTranslation, Rotation3d.kZero);
   }
 
   /**

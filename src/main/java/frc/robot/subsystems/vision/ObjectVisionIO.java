@@ -19,7 +19,6 @@ public interface ObjectVisionIO {
   public static record ObjectObservation(
       double timestamp, // Timestamp of the observation
       int classId, // ID of the detected object
-      String className, // Class name of the detected object (e.g., "fuel")
       double confidence, // Confidence level: 0=not confident; 1=certain
       Rotation2d tx, // Yaw
       Rotation2d ty, // Pitch

@@ -13,7 +13,7 @@ import org.photonvision.PhotonCamera;
  * IO implementation for the real PhotonVision camera with object detection pipeline
  */
 public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
-  private final PhotonCamera camera; // Name of camera defined in PhontonVision dashboard
+  private final PhotonCamera camera; // Name of camera defined in PhotonVision dashboard
   private final Transform3d robotToCamera; // Position and orientation of camera relative to robot
   private final Supplier<Pose2d>
       robotPoseSupplier; // Function to return the current pose of the robot
@@ -55,36 +55,38 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
       return;
     }
 
-    // Just process the most recent result
-    var result = results.get(results.size() - 1);
-
     // Get the pose of the robot
     var fieldToRobot = new Pose3d(robotPoseSupplier.get());
 
+    // Note: we handle all results, not just the most recent because the object tracker
+    // will filter out duplicates
     inputs.observations =
-        result.getTargets().stream()
-            .map(
-                target -> {
-                  Rotation2d tx = Rotation2d.fromDegrees(target.getYaw());
-                  Rotation2d ty = Rotation2d.fromDegrees(target.getPitch());
+        results.stream()
+            .flatMap(
+                result ->
+                    result.getTargets().stream()
+                        .map(
+                            target -> {
+                              Rotation2d tx = Rotation2d.fromDegrees(target.getYaw());
+                              Rotation2d ty = Rotation2d.fromDegrees(target.getPitch());
 
-                  Pose3d robotRelativePose =
-                      estimateRobotRelativeObjectPose(tx, ty, objectHeightMeters);
+                              Pose3d robotRelativePose =
+                                  estimateRobotRelativeObjectPose(tx, ty, objectHeightMeters);
 
-                  Pose3d fieldPose =
-                      fieldToRobot.transformBy(new Transform3d(Pose3d.kZero, robotRelativePose));
+                              Pose3d fieldPose =
+                                  fieldToRobot.transformBy(
+                                      new Transform3d(Pose3d.kZero, robotRelativePose));
 
-                  return new ObjectObservation(
-                      result.getTimestampSeconds(),
-                      target.getDetectedObjectClassID(),
-                      classNameFromId(target.getDetectedObjectClassID()),
-                      target.getDetectedObjectConfidence(),
-                      tx,
-                      ty,
-                      target.getArea(),
-                      robotRelativePose,
-                      fieldPose);
-                })
+                              return new ObjectObservation(
+                                  result.getTimestampSeconds(),
+                                  target.getDetectedObjectClassID(),
+                                  target.getDetectedObjectConfidence(),
+                                  tx,
+                                  ty,
+                                  target.getArea(),
+                                  robotRelativePose,
+                                  fieldPose);
+                            }))
             .toArray(ObjectObservation[]::new);
   }
 
@@ -99,34 +101,58 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
   private Pose3d estimateRobotRelativeObjectPose(
       Rotation2d tx, Rotation2d ty, double objectHeightMeters) {
 
+    // Camera's 3d position and orientation relative to the robot
     Pose3d cameraPose = Pose3d.kZero.transformBy(robotToCamera);
 
-    // PhotonVision yaw is usually positive to the left in image/target terms,
-    // while WPILib +Y is left. If this is reversed in testing, flip this sign.
+    /*
+     * Record the 3d rotation from the camera to the target
+     *
+     * PhotonVision yaw is positive to the right in image/target terms (i.e., increasing
+     * pixel x values), while WPILib +z is positive counterclockwise when viewed from above
+     * (i.e, left). Probably need to negate the tx (yaw) value before sending to WPILIB.
+     * Test by placing a ball to the robot's right and verifying the estimated y
+     * coordinate is positive.
+     */
     Rotation3d targetRotation =
         new Rotation3d(
             0.0,
             -ty.getRadians(), // pitch down should point toward floor
-            -tx.getRadians());
+            -tx.getRadians()); // yaw
 
+    // Unit vector from the camera to the target relative to the camera
     Translation3d rayCameraFrame = new Translation3d(1.0, targetRotation);
 
+    // Unit vector from the camera to the target relative to the robot
     Translation3d rayRobotFrame = rayCameraFrame.rotateBy(cameraPose.getRotation());
 
+    // Z component of unit vector relative to robot
     double dz = rayRobotFrame.getZ();
+    // Algorithm doesn't work if the target is directly in front of camera
     if (Math.abs(dz) < 1e-6) {
       return Pose3d.kZero;
     }
 
+    /*
+     * We know the distance of the vertical dro from the camera height to the target
+     * (which in the case of a ball is the horizontal plane thru the center of ball).
+     * Use that distance normalized by the z component of the unit vector in robot
+     * space to compute a scale factor. This scale factor can be applied to the x and y
+     * components of the vector to determine the corresponding x and y distances to
+     * the target.
+     */
     double scale = (objectHeightMeters - cameraPose.getZ()) / dz;
 
     if (scale < 0.0) {
       return Pose3d.kZero;
     }
 
+    // Use the scale factor to get a vector from the camera to the target, then add
+    // that vector to the position of camera to compute the position of the target
+    // relative to the robot
     Translation3d robotToObjectTranslation =
         cameraPose.getTranslation().plus(rayRobotFrame.times(scale));
 
+    // Return a pose for the target relative to the robot
     return new Pose3d(robotToObjectTranslation, Rotation3d.kZero);
   }
 

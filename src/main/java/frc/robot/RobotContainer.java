@@ -28,7 +28,6 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.vision.ObjectTracker;
 import frc.robot.subsystems.vision.ObjectVision;
 import frc.robot.subsystems.vision.ObjectVisionConstants;
 import frc.robot.subsystems.vision.ObjectVisionIO;
@@ -50,7 +49,6 @@ public class RobotContainer {
   private final Drive drive;
   private final Vision vision;
   private final ObjectVision objectVision;
-  private final ObjectTracker objectTracker;
 
   // Controller
   private final CommandPS4Controller controller = new CommandPS4Controller(0);
@@ -162,9 +160,6 @@ public class RobotContainer {
 
         break;
     }
-
-    // Setup Object tracker
-    objectTracker = new ObjectTracker(objectVision);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());

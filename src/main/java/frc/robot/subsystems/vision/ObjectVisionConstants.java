@@ -9,6 +9,7 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 public class ObjectVisionConstants {
@@ -25,7 +26,17 @@ public class ObjectVisionConstants {
   // This camera goes on the back of the robot, facing backwards
   public static Transform3d robotToObjectCamera =
       new Transform3d(
-          -Constants.robotLengthInMeters / 2.0, 0.0, 0.2413, new Rotation3d(0.0, 0.0, Math.PI));
+          -Constants.robotLengthInMeters / 2.0,
+          0.0,
+          Units.inchesToMeters(20.5),
+          new Rotation3d(0.0, -35., Math.PI));
 
   public static double fuelDiameterInMeters = 0.15; // Fuel ball is 15 cm in diameter
+
+  // Tuning constants for tracking objects
+  public static final double MATCH_DISTANCE_METERS =
+      1.5 * ObjectVisionConstants.fuelDiameterInMeters;
+  public static final double MAX_STALENESS_SECONDS = 0.5;
+  public static final double BLEND_ALPHA = 0.3;
+  public static final int MIN_HITS_TO_CONFIRM = 3;
 }

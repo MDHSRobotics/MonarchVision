@@ -2,6 +2,7 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,7 @@ public class ObjectVision extends SubsystemBase {
   private final ObjectVisionIO[] io;
   private final ObjectVisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
+  private final TrackedObjects trackedObjects;
 
   /**
    * Constructor for ObjectVision class
@@ -33,6 +35,9 @@ public class ObjectVision extends SubsystemBase {
       disconnectedAlerts[i] =
           new Alert("Object vision camera " + i + " is disconnected.", AlertType.kWarning);
     }
+
+    // Initialize the object tracker
+    trackedObjects = new TrackedObjects();
   }
 
   /**
@@ -53,10 +58,16 @@ public class ObjectVision extends SubsystemBase {
       }
     }
 
-    // Log all the raw observations
+    // Feed all the observations from this cycle into the tracker
+    trackedObjects.update(
+        allObservations.toArray(new ObjectVisionIO.ObjectObservation[0]), Timer.getFPGATimestamp());
+
+    // Log confirmed poses to AdvantageScope
+    Logger.recordOutput("ObjectVision/ConfirmedTrackedObjects", trackedObjects.getConfirmedPoses());
+
+    // Log unconfirmed poses to AdvantageScope - Useful for debugging; might want to disable
     Logger.recordOutput(
-        "ObjectVision/Summary/RawObservations",
-        allObservations.toArray(new ObjectVisionIO.ObjectObservation[0]));
+        "ObjectVision/UnconfirmedTrackedObjects", trackedObjects.getUnconfirmedPoses());
   }
 
   public ObjectVisionIO.ObjectObservation[] getObservations(int cameraIndex) {

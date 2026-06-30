@@ -39,9 +39,10 @@ public class ObjectVisionConstants {
           -Constants.robotLengthInMeters / 2.0,
           0.0,
           Units.inchesToMeters(20.5),
-          new Rotation3d(0.0,
-                         Math.toRadians(35.),  // Positive points down!!! See above.
-                         Math.PI));
+          new Rotation3d(
+              0.0,
+              Math.toRadians(35.), // Positive points down!!! See above.
+              Math.PI));
 
   public static double fuelDiameterInMeters = 0.15; // Fuel ball is 15 cm in diameter
 

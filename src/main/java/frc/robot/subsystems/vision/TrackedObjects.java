@@ -1,17 +1,5 @@
-// This class and related object-tracking classes were were initially created by AI Claude
-// resulting from the following prompt:
-/*
- * Related to object detection. I’d like to have a class called TrackedObjects
- * which receives the observations from the object detection pipeline and maintains
- * a list of objects that are reliably in the field of view. One issue is that often
- * a given ball will be detected one cycle, then not detected, then detected again, etc.
- * this causes its display in advantagescope to flicker.  Id like the ball to be
- * considered detected even if it is not every cycle, as long as there has been a fairly
- * recent observation.  Moving balls willbe an issue.  Any thoughts on the algorithm for
- * this class? By the way, currently i am only processing the most recent event but i
- * think in conjunction with this TracedObjects class i should process them all and rely
- * on timestamps
- */
+// This class and related object-tracking classes were initially created by AI Claude
+// but subsequently modified and fully reviewed
 
 package frc.robot.subsystems.vision;
 

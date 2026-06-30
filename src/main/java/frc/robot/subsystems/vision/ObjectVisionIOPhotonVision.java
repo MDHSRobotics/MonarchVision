@@ -149,7 +149,8 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
 
     // Z component of unit vector relative to robot
     double dz = rayRobotFrame.getZ();
-    // Algorithm doesn't work if the target is directly in front of camera
+    
+    // Algorithm doesn't work if the centers of the target and camera have same z value
     if (Math.abs(dz) < 1e-6) {
       return Pose3d.kZero;
     }

@@ -12,6 +12,13 @@ public interface ObjectVisionIO {
   @AutoLog
   public static class ObjectVisionIOInputs {
     public boolean connected = false;
+    public boolean hasResults = false;
+    public boolean hasTargets = false;
+    public double latestTimestampSeconds = 0.0;
+    public int unreadResultCount = 0;
+    public int targetCount = 0;
+    public String status = "Unknown";
+
     public ObjectObservation[] observations = new ObjectObservation[0];
   }
 

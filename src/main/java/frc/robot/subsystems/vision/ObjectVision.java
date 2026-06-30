@@ -13,6 +13,8 @@ public class ObjectVision extends SubsystemBase {
   private final ObjectVisionIO[] io;
   private final ObjectVisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
+  private final Alert[] noResultsAlerts;
+  private final Alert[] noTargetsAlerts;
   private final TrackedObjects trackedObjects;
 
   /**
@@ -29,10 +31,16 @@ public class ObjectVision extends SubsystemBase {
       inputs[i] = new ObjectVisionIOInputsAutoLogged();
     }
 
-    // Initialize disconnected alerts
+    // Initialize alerts
     disconnectedAlerts = new Alert[io.length];
+    noResultsAlerts = new Alert[io.length];
+    noTargetsAlerts = new Alert[io.length];
     for (int i = 0; i < inputs.length; i++) {
       disconnectedAlerts[i] =
+          new Alert("Object vision camera " + i + " is disconnected.", AlertType.kWarning);
+      noResultsAlerts[i] =
+          new Alert("Object vision camera " + i + " is disconnected.", AlertType.kWarning);
+      noTargetsAlerts[i] =
           new Alert("Object vision camera " + i + " is disconnected.", AlertType.kWarning);
     }
 
@@ -53,9 +61,21 @@ public class ObjectVision extends SubsystemBase {
 
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
+      noResultsAlerts[cameraIndex].set(
+          inputs[cameraIndex].connected && !inputs[cameraIndex].hasResults);
+
+      noTargetsAlerts[cameraIndex].set(
+          inputs[cameraIndex].connected
+              && inputs[cameraIndex].hasResults
+              && !inputs[cameraIndex].hasTargets);
+
       for (var observation : inputs[cameraIndex].observations) {
         allObservations.add(observation);
       }
+    }
+
+    if (allObservations.isEmpty()) {
+      return;
     }
 
     // Feed all the observations from this cycle into the tracker
@@ -63,11 +83,19 @@ public class ObjectVision extends SubsystemBase {
         allObservations.toArray(new ObjectVisionIO.ObjectObservation[0]), Timer.getFPGATimestamp());
 
     // Log confirmed poses to AdvantageScope
-    Logger.recordOutput("ObjectVision/ConfirmedTrackedObjects", trackedObjects.getConfirmedPoses());
+    Logger.recordOutput(
+        "ObjectVision/ConfirmedTrackedObjects/FieldPoses", trackedObjects.getConfirmedFieldPoses());
+    Logger.recordOutput(
+        "ObjectVision/ConfirmedTrackedObjects/RobotRelativePoses",
+        trackedObjects.getConfirmedRobotRelativePoses());
 
     // Log unconfirmed poses to AdvantageScope - Useful for debugging; might want to disable
     Logger.recordOutput(
-        "ObjectVision/UnconfirmedTrackedObjects", trackedObjects.getUnconfirmedPoses());
+        "ObjectVision/UnconfirmedTrackedObjects/FieldPoses",
+        trackedObjects.getUnconfirmedFieldPoses());
+    Logger.recordOutput(
+        "ObjectVision/UnconfirmedTrackedObjects/RobotRelativePoses",
+        trackedObjects.getUnconfirmedRobotRelativePoses());
   }
 
   public ObjectVisionIO.ObjectObservation[] getObservations(int cameraIndex) {

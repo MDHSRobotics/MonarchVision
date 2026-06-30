@@ -48,20 +48,33 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
   @Override
   public void updateInputs(ObjectVisionIOInputs inputs) {
     inputs.connected = camera.isConnected();
+    inputs.hasResults = false;
+    inputs.hasTargets = false;
+    inputs.unreadResultCount = 0;
+    inputs.targetCount = 0;
+    inputs.latestTimestampSeconds = 0.0;
+    inputs.status = inputs.connected ? "Connected, no unread results" : "Disconnected";
+    inputs.observations = new ObjectObservation[0];
 
-    var results = camera.getAllUnreadResults();
-    if (results.isEmpty()) {
-      inputs.observations = new ObjectObservation[0];
+    if (!inputs.connected) {
       return;
     }
 
-    // Get the pose of the robot
+    var results = camera.getAllUnreadResults();
+    inputs.unreadResultCount = results.size();
+
+    if (results.isEmpty()) {
+      return;
+    }
+
+    inputs.hasResults = true;
+
+    // Get the pose of the robot once for this update cycle
     var fieldToRobot = new Pose3d(robotPoseSupplier.get());
 
-    // Note: we handle all results, not just the most recent because the object tracker
-    // will filter out duplicates
     inputs.observations =
         results.stream()
+            .peek(result -> inputs.latestTimestampSeconds = result.getTimestampSeconds())
             .flatMap(
                 result ->
                     result.getTargets().stream()
@@ -88,6 +101,15 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
                                   fieldPose);
                             }))
             .toArray(ObjectObservation[]::new);
+
+    inputs.targetCount = inputs.observations.length;
+    inputs.hasTargets = inputs.targetCount > 0;
+
+    if (inputs.hasTargets) {
+      inputs.status = "Connected, targets visible";
+    } else {
+      inputs.status = "Connected, results received, no targets";
+    }
   }
 
   /**
@@ -133,7 +155,7 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
     }
 
     /*
-     * We know the distance of the vertical dro from the camera height to the target
+     * We know the distance of the vertical drop from the camera height to the target
      * (which in the case of a ball is the horizontal plane thru the center of ball).
      * Use that distance normalized by the z component of the unit vector in robot
      * space to compute a scale factor. This scale factor can be applied to the x and y

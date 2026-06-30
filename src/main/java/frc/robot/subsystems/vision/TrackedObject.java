@@ -25,6 +25,7 @@ public class TrackedObject {
   public final int id; // Unique ID for this tracked object
 
   public Pose3d fieldPose; // Current best estimate of field position
+  Pose3d robotRelativePose; // Current best estimate of the object relative to the robot
   public double lastSeenTimestamp;
   public double firstSeenTimestamp;
   public int consecutiveMisses;
@@ -35,6 +36,7 @@ public class TrackedObject {
     this.id = id;
     this.classId = obs.classId();
     this.fieldPose = obs.fieldPose();
+    this.robotRelativePose = obs.robotRelativePose();
     this.lastSeenTimestamp = obs.timestamp();
     this.firstSeenTimestamp = obs.timestamp();
     this.consecutiveMisses = 0;
@@ -50,6 +52,8 @@ public class TrackedObject {
   public void update(ObjectObservation obs) {
     // Blend old and new pose to smooth out noise
     fieldPose = blendPose(fieldPose, obs.fieldPose(), ObjectVisionConstants.BLEND_ALPHA);
+    robotRelativePose =
+        blendPose(robotRelativePose, obs.robotRelativePose(), ObjectVisionConstants.BLEND_ALPHA);
     lastSeenTimestamp = obs.timestamp();
     consecutiveMisses = 0;
     hitCount++;

@@ -58,7 +58,6 @@ public class TrackedObjects {
         // No match found — create a new tracked object
         var newObject = new TrackedObject(nextId++, observation);
         trackedObjects.add(newObject);
-        matchedThisCycle.add(newObject);
       }
     }
 
@@ -87,11 +86,19 @@ public class TrackedObjects {
   }
 
   /**
-   * Returns confirmed object poses as an array, convenient for logging to AdvantageKit and
+   * Returns confirmed field poses as an array, convenient for logging to AdvantageKit and
    * displaying in AdvantageScope as a 3D field layer.
    */
-  public Pose3d[] getConfirmedPoses() {
+  public Pose3d[] getConfirmedFieldPoses() {
     return getConfirmedObjects().stream().map(obj -> obj.fieldPose).toArray(Pose3d[]::new);
+  }
+
+  /**
+   * Returns confirmed robot relative poses as an array, convenient for logging to AdvantageKit and
+   * displaying in AdvantageScope as a 3D field layer.
+   */
+  public Pose3d[] getConfirmedRobotRelativePoses() {
+    return getConfirmedObjects().stream().map(obj -> obj.robotRelativePose).toArray(Pose3d[]::new);
   }
 
   /**
@@ -103,11 +110,21 @@ public class TrackedObjects {
   }
 
   /**
-   * Returns unconfirmed object poses as an array, convenient for logging to AdvantageKit and
+   * Returns unconfirmed field poses as an array, convenient for logging to AdvantageKit and
    * displaying in AdvantageScope as a 3D field layer.
    */
-  public Pose3d[] getUnconfirmedPoses() {
+  public Pose3d[] getUnconfirmedFieldPoses() {
     return getUnconfirmedObjects().stream().map(obj -> obj.fieldPose).toArray(Pose3d[]::new);
+  }
+
+  /**
+   * Returns unconfirmed robot relative poses as an array, convenient for logging to AdvantageKit
+   * and displaying in AdvantageScope as a 3D field layer.
+   */
+  public Pose3d[] getUnconfirmedRobotRelativePoses() {
+    return getUnconfirmedObjects().stream()
+        .map(obj -> obj.robotRelativePose)
+        .toArray(Pose3d[]::new);
   }
 
   /**
@@ -122,9 +139,6 @@ public class TrackedObjects {
 
     // See if this observation is close to one of the unmatched tracked objects
     for (var trackedObject : trackedObjects) {
-
-      // Skip if already matched
-      if (matchedThisCycle.contains(trackedObject)) continue;
 
       // Must be the same class of object
       if (trackedObject.classId != observation.classId()) continue;

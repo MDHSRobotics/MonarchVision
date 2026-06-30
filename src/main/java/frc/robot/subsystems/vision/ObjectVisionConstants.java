@@ -21,15 +21,14 @@ public class ObjectVisionConstants {
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
-  // For testing Rubik Pi3 in the loop, the camera is on the test board 9.5 inches from
-  // the floor = 24.13 cm.
-  // This camera goes on the back of the robot, facing backwards
+  // For testing Rubik Pi3 in the loop, the camera is on the test board 20.5 inches from floor
+  // This camera goes on the back of the robot, facing backwards.
   public static Transform3d robotToObjectCamera =
       new Transform3d(
           -Constants.robotLengthInMeters / 2.0,
           0.0,
           Units.inchesToMeters(20.5),
-          new Rotation3d(0.0, -35., Math.PI));
+          new Rotation3d(0.0, Math.toRadians(35.), Math.PI));
 
   public static double fuelDiameterInMeters = 0.15; // Fuel ball is 15 cm in diameter
 

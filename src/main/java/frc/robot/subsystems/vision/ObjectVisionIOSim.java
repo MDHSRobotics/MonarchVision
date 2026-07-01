@@ -1,5 +1,6 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -9,7 +10,10 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 
 /***
  * Simulated PhotonVision for ObjectVision IO. This class maintains a list of fuel objects
@@ -17,18 +21,20 @@ import java.util.function.Supplier;
  * position to detect one or more of them, this class will compute the yaw and pitch.
  */
 public class ObjectVisionIOSim extends ObjectVisionIOBase {
-
-  private final List<GamePiece> gamePieces = new ArrayList<>();
-
-  class GamePiece {
-    public int classID; // ID of this class of game piece (0=fuel)
-    Pose3d fieldPose; // Pose of this game piece on the field
-
-    GamePiece(int classID, Pose3d fieldPose) {
-      this.classID = classID;
-      this.fieldPose = fieldPose;
-    }
+  @AutoLog
+  public static class ObjectVisionIOSimGamePieces {
+    public int classID = 0;
+    public Pose3d[] fieldPoses = new Pose3d[0];
   }
+
+  private final ObjectVisionIOSimGamePiecesAutoLogged gamePieces =
+      new ObjectVisionIOSimGamePiecesAutoLogged();
+
+  private static final double HORIZONTALFOVRAD = Math.toRadians(65.);
+  private static final double VERTICALFOVRAD = Math.toRadians(40.);
+  private static final double MAXDISTANCEMETERS = 3.5;
+
+  private final Random random = new Random();
 
   /**
    * Constructor
@@ -47,13 +53,17 @@ public class ObjectVisionIOSim extends ObjectVisionIOBase {
     super(cameraName, robotToCamera, robotPoseSupplier, objectHeightMeters);
 
     // Load locations of balls
-    GamePiece gp1 =
-        new GamePiece(
-            0,
-            new Pose3d(
-                new Translation3d(1., 1., ObjectVisionConstants.fuelDiameterInMeters / 2.),
-                new Rotation3d(0., 0., 0.)));
-    gamePieces.add((gp1));
+    gamePieces.classID = 0;
+    int ballCount = 1;
+    gamePieces.fieldPoses = new Pose3d[ballCount];
+
+    Pose3d gp1 =
+        new Pose3d(
+            new Translation3d(2.08, 4.04, ObjectVisionConstants.fuelDiameterInMeters / 2.),
+            new Rotation3d(0., 0., 0.));
+    gamePieces.fieldPoses[0] = gp1;
+
+    Logger.processInputs("ObjectVision/SimGamePieces", gamePieces);
   }
 
   /**
@@ -75,18 +85,63 @@ public class ObjectVisionIOSim extends ObjectVisionIOBase {
 
     List<ObjectObservation> observations = new ArrayList<>();
 
-    for (GamePiece gamePiece : gamePieces) {
+    // Pose of where the robot currently is on the field
+    Pose3d robotPose3d = new Pose3d(robotPoseSupplier.get());
 
-      double area = .1;
-      Rotation2d ty = new Rotation2d(Math.toRadians(10.)); // Pitch
-      Rotation2d tx = new Rotation2d(Math.toRadians(20.)); // Yaw
+    // Determine the camera pose on the field based on its offset from center of robot
+    Pose3d cameraPose = robotPose3d.transformBy(robotToCamera);
+
+    // Test all of the predefined game pieces on the field
+    for (Pose3d gamePiecePose : gamePieces.fieldPoses) {
+      // Get the vector from the camera to the game piece being tested
+      Transform3d cameraToObjectXform = new Transform3d(cameraPose, gamePiecePose);
+      Translation3d cameraToObjectVector = cameraToObjectXform.getTranslation();
+
+      // Ignore this game piece if it is behind the camera
+      if (cameraToObjectVector.getX() <= 0.0) continue;
+
+      // Get the yaw and pitch of the game piece relative to the center of the camera
+      double yawRad = Math.atan2(cameraToObjectVector.getY(), cameraToObjectVector.getX());
+      double pitchRad =
+          Math.atan2(
+              cameraToObjectVector.getZ(),
+              Math.hypot(cameraToObjectVector.getX(), cameraToObjectVector.getY()));
+
+      // Ignore this game piece if it is outside the camera's field of view
+      if (Math.abs(yawRad) > HORIZONTALFOVRAD / 2.0) continue;
+      if (Math.abs(pitchRad) > VERTICALFOVRAD / 2.0) continue;
+
+      // Get the distance of the game piece from the camera and ignore it if it is too far away
+      double distance = cameraToObjectVector.getNorm();
+      if (distance > MAXDISTANCEMETERS) continue;
+
+      // Reduce the confidence as the distance increases
+      double confidence = MathUtil.clamp(1.0 - distance / MAXDISTANCEMETERS, 0.15, 0.95);
+
+      // Introduce some realism by slightly and randomly perturbing the yaw, pitch and confidence
+      yawRad += random.nextGaussian() * 0.0087; // About .5 degrees = .0087 radians
+      pitchRad += random.nextGaussian() * 0.0087; // About .5 degrees = .0087 radians
+      confidence += random.nextGaussian() * 0.03;
+
+      Rotation2d ty = new Rotation2d(pitchRad); // Pitch
+      Rotation2d tx = new Rotation2d(-yawRad); // Yaw (NOTE opposite sign)
+
+      // Fuel (ball) game piece has a class ID of 0
       int classID = 0;
-      double confidence = 1.0;
 
+      // Estimate an area assuming that a ball at 1 meter fills about 10% of the image
+      double kAreaAt1Meter = 0.10;
+      double area = kAreaAt1Meter / (distance * distance);
+      area = MathUtil.clamp(area, 0.0, 1.0);         // Clamp to [0, 1]
+
+      // Estimate the pose of the object relative to the robot
       Pose3d robotRelativePose = estimateRobotRelativeObjectPose(tx, ty, objectHeightMeters);
 
-      Pose3d fieldPose = fieldToRobot.transformBy(new Transform3d(Pose3d.kZero, robotRelativePose));
+      // Get the pose of the object relative to the field
+      Pose3d robotFieldPose =
+          fieldToRobot.transformBy(new Transform3d(Pose3d.kZero, robotRelativePose));
 
+      // Create a generic object observation
       ObjectObservation observation =
           new ObjectObservation(
               Timer.getFPGATimestamp(),
@@ -96,7 +151,7 @@ public class ObjectVisionIOSim extends ObjectVisionIOBase {
               ty,
               area,
               robotRelativePose,
-              fieldPose);
+              robotFieldPose);
 
       observations.add(observation);
     }

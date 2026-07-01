@@ -1,5 +1,6 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
@@ -65,22 +66,19 @@ public class ObjectVision extends SubsystemBase {
       }
     }
 
-    if (allObservations.isEmpty()) {
-      return;
-    }
-
     // Feed all the observations from this cycle into the tracker
     trackedObjects.update(
         allObservations.toArray(new ObjectVisionIO.ObjectObservation[0]), Timer.getFPGATimestamp());
 
-    // Log confirmed poses to AdvantageScope
-    Logger.recordOutput(
-        "ObjectVision/ConfirmedTrackedObjects/FieldPoses", trackedObjects.getConfirmedFieldPoses());
+    // Log status of tracked targets to AdvantageScope
+    Pose3d[] confirmedFieldPoses = trackedObjects.getConfirmedFieldPoses();
+    Logger.recordOutput("ObjectVision/HasConfirmedTargets", confirmedFieldPoses.length > 0);
+
+    Logger.recordOutput("ObjectVision/ConfirmedTrackedObjects/FieldPoses", confirmedFieldPoses);
     Logger.recordOutput(
         "ObjectVision/ConfirmedTrackedObjects/RobotRelativePoses",
         trackedObjects.getConfirmedRobotRelativePoses());
 
-    // Log unconfirmed poses to AdvantageScope - Useful for debugging; might want to disable
     Logger.recordOutput(
         "ObjectVision/UnconfirmedTrackedObjects/FieldPoses",
         trackedObjects.getUnconfirmedFieldPoses());

@@ -36,6 +36,7 @@ import frc.robot.subsystems.vision.ObjectVision;
 import frc.robot.subsystems.vision.ObjectVisionConstants;
 import frc.robot.subsystems.vision.ObjectVisionIO;
 import frc.robot.subsystems.vision.ObjectVisionIOPhotonVision;
+import frc.robot.subsystems.vision.ObjectVisionIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -132,12 +133,21 @@ public class RobotContainer {
                       ObjectVisionConstants.objectCameraName,
                       ObjectVisionConstants.robotToObjectCamera,
                       drive::getPose,
-                      ObjectVisionConstants.fuelDiameterInMeters
-                          / 2.0)); // Raise the ball by its radius so its bottom is on the floor
+                      // Raise the ball by its radius so its bottom is on the floor:
+                      ObjectVisionConstants.fuelDiameterInMeters / 2.0));
           // (meters)
         } else {
 
-          objectVision = new ObjectVision(new ObjectVisionIO() {});
+          // Simulate object detection using predefined positions of balls
+          objectVision =
+              new ObjectVision(
+                  new ObjectVisionIOSim(
+                      ObjectVisionConstants.objectCameraName,
+                      ObjectVisionConstants.robotToObjectCamera,
+                      drive::getPose,
+                      // Raise the ball by its radius so its bottom is on the floor:
+                      ObjectVisionConstants.fuelDiameterInMeters / 2.0));
+          // (meters)
         }
 
         break;

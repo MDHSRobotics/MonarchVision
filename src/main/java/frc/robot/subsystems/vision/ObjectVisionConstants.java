@@ -15,7 +15,7 @@ import frc.robot.Constants;
 public class ObjectVisionConstants {
 
   /** Are we running a physics simulator, but with a real Rubik Pi3 connected. */
-  public static boolean objectCameraInTheLoop = true;
+  public static boolean objectCameraInTheLoop = false;
 
   public static String objectCameraName = "rubik-camera1";
 

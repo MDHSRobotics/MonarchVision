@@ -116,9 +116,13 @@ public class TrackedObjects {
   }
 
   /**
-   * Find the best matching existing tracked object for a new observation. Matches by class ID and
-   * proximity. Returns -1 if no suitable match found.
+   * Find the best matching existing tracked object for a new observation.
+   *
+   * @param observation New observation to be tested against existing tracked objects
+   * @param matchedThisCycle Set of objects matched during this cycle
+   * @return best matched tracked object or null if no suitable match found
    */
+  
   private TrackedObject findBestMatch(
       ObjectObservation observation, Set<TrackedObject> matchedThisCycle) {
 

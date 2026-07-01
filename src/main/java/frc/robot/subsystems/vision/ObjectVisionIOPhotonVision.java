@@ -9,9 +9,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import java.util.function.Supplier;
 import org.photonvision.PhotonCamera;
 
-/*
- * IO implementation for the real PhotonVision camera with object detection pipeline
- */
+/** IO implementation for the real PhotonVision camera with object detection pipeline */
 public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
   private final PhotonCamera camera; // Name of camera defined in PhotonVision dashboard
   private final Transform3d robotToCamera; // Position and orientation of camera relative to robot
@@ -22,7 +20,7 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
   /**
    * Creates a new ObjectVisionIOPhotonVision.
    *
-   * @param name The configured name of the camera.
+   * @param name The configured name of the PhotonVision camera.
    * @param robotToCamera The 3D position and orientation of the camera relative to the robot.
    * @param robotPoseSupplier Function to return the current pose of the robot
    * @param objectHeightMeters Height of the object relative to the floor of field
@@ -42,8 +40,8 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
   /**
    * Return all of the object observations detected by PhotonVision
    *
-   * @param inputs Object of type ObjectVisionIOInputs that will be populated with the connected
-   *     status of the camera plus an array of object observations
+   * @param inputs Object of type ObjectVisionIOInputs that will be populated with the status of the
+   *     camera plus an array of object observations
    */
   @Override
   public void updateInputs(ObjectVisionIOInputs inputs) {
@@ -72,9 +70,10 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
     // Get the pose of the robot once for this update cycle
     var fieldToRobot = new Pose3d(robotPoseSupplier.get());
 
+    inputs.latestTimestampSeconds = results.get(results.size() - 1).getTimestampSeconds();
+
     inputs.observations =
         results.stream()
-            .peek(result -> inputs.latestTimestampSeconds = result.getTimestampSeconds())
             .flatMap(
                 result ->
                     result.getTargets().stream()
@@ -138,7 +137,7 @@ public class ObjectVisionIOPhotonVision implements ObjectVisionIO {
     Rotation3d targetRotation =
         new Rotation3d(
             0.0,
-            -ty.getRadians(), // pitch down should point toward floor
+            -ty.getRadians(), // pitch should be downward toward floor
             -tx.getRadians()); // yaw
 
     // Unit vector from the camera to the target relative to the camera

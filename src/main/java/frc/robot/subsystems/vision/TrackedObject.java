@@ -6,7 +6,9 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.subsystems.vision.ObjectVisionIO.ObjectObservation;
 
-/** Represents a single object being tracked across multiple observation cycles. */
+/***
+ *  Represents a single object being tracked across multiple observation cycles.
+ */
 public class TrackedObject {
 
   public final int classId;
@@ -36,7 +38,11 @@ public class TrackedObject {
     }
   }
 
-  /** Update this tracked object with a new matching observation. */
+  /**
+   * Update this tracked object with a new matching observation.
+   *
+   * @param obs Observationto be used to update this tracked object
+   */
   public void update(ObjectObservation obs) {
     // Blend old and new pose to smooth out noise
     fieldPose = blendPose(fieldPose, obs.fieldPose(), ObjectVisionConstants.BLEND_ALPHA);
@@ -51,19 +57,32 @@ public class TrackedObject {
     }
   }
 
-  /** Returns true if this object has not been seen recently enough to keep. */
+  /***
+   *  Returns true if this object has not been seen recently enough to keep.
+   */
   public boolean isStale(double currentTimestamp) {
     return (currentTimestamp - lastSeenTimestamp) > ObjectVisionConstants.MAX_STALENESS_SECONDS;
   }
 
-  /** Returns the distance from this tracked object's pose to an observed pose. */
+  /**
+   * Returns the distance from this tracked object's pose to an observed pose.
+   *
+   * @param other
+   * @return Distance from this tracked object to the input "other" object
+   */
   public double distanceTo(Pose3d other) {
     return fieldPose.getTranslation().getDistance(other.getTranslation());
   }
 
+  /**
+   * Linear interpolation between current and observed
+   *
+   * @param current
+   * @param observed
+   * @param alpha alpha=0 keeps current, alpha=1 snaps to observed
+   * @return
+   */
   private static Pose3d blendPose(Pose3d current, Pose3d observed, double alpha) {
-    // Linear interpolation between current and observed
-    // alpha=0 keeps current, alpha=1 snaps to observed
     var translation = current.getTranslation().interpolate(observed.getTranslation(), alpha);
     var rotation = current.getRotation().interpolate(observed.getRotation(), alpha);
     return new Pose3d(translation, rotation);

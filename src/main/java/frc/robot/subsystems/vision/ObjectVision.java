@@ -25,7 +25,7 @@ public class ObjectVision extends SubsystemBase {
   public ObjectVision(ObjectVisionIO... io) {
     this.io = io;
 
-    // Initialize the arrary of inputs to be logged by this class
+    // Initialize the array of inputs to be logged by this class
     inputs = new ObjectVisionIOInputsAutoLogged[io.length];
     for (int i = 0; i < inputs.length; i++) {
       inputs[i] = new ObjectVisionIOInputsAutoLogged();
@@ -49,7 +49,7 @@ public class ObjectVision extends SubsystemBase {
   }
 
   /**
-   * The Periodic method finds all object observations, passes them to the consumer, and logs them
+   * The Periodic method finds all object observations, passes them to the tracker, and logs them
    */
   @Override
   public void periodic() {
@@ -98,10 +98,21 @@ public class ObjectVision extends SubsystemBase {
         trackedObjects.getUnconfirmedRobotRelativePoses());
   }
 
+  /**
+   * Get the observations from a specific camera
+   *
+   * @param cameraIndex
+   * @return Array of observations
+   */
   public ObjectVisionIO.ObjectObservation[] getObservations(int cameraIndex) {
     return inputs[cameraIndex].observations;
   }
 
+  /**
+   * Get all observations from all cameras
+   *
+   * @return Array of observations
+   */
   public ObjectVisionIO.ObjectObservation[] getAllObservations() {
     List<ObjectVisionIO.ObjectObservation> allObservations = new LinkedList<>();
 

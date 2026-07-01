@@ -4,17 +4,13 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
-/**
- * This interface is for object detection (as opposed to April tag detection)
- */
+/** This interface is for object detection (as opposed to April tag detection) */
 public interface ObjectVisionIO {
   @AutoLog
   public static class ObjectVisionIOInputs {
     public boolean connected = false;
-    public boolean hasResults = false;
     public boolean hasTargets = false;
     public double latestTimestampSeconds = 0.0;
-    public int unreadResultCount = 0;
     public int targetCount = 0;
     public String status = "Unknown";
 

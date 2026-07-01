@@ -13,7 +13,6 @@ public class ObjectVision extends SubsystemBase {
   private final ObjectVisionIO[] io;
   private final ObjectVisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
-  private final Alert[] noResultsAlerts;
   private final Alert[] noTargetsAlerts;
   private final TrackedObjects trackedObjects;
 
@@ -33,15 +32,12 @@ public class ObjectVision extends SubsystemBase {
 
     // Initialize alerts
     disconnectedAlerts = new Alert[io.length];
-    noResultsAlerts = new Alert[io.length];
     noTargetsAlerts = new Alert[io.length];
     for (int i = 0; i < inputs.length; i++) {
       disconnectedAlerts[i] =
           new Alert("Object vision camera " + i + " is disconnected.", AlertType.kWarning);
-      noResultsAlerts[i] =
-          new Alert("Object vision camera " + i + " is disconnected.", AlertType.kWarning);
       noTargetsAlerts[i] =
-          new Alert("Object vision camera " + i + " is disconnected.", AlertType.kWarning);
+          new Alert("Object vision camera " + i + " has no targets.", AlertType.kWarning);
     }
 
     // Initialize the object tracker
@@ -61,13 +57,8 @@ public class ObjectVision extends SubsystemBase {
 
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
-      noResultsAlerts[cameraIndex].set(
-          inputs[cameraIndex].connected && !inputs[cameraIndex].hasResults);
-
       noTargetsAlerts[cameraIndex].set(
-          inputs[cameraIndex].connected
-              && inputs[cameraIndex].hasResults
-              && !inputs[cameraIndex].hasTargets);
+          inputs[cameraIndex].connected && !inputs[cameraIndex].hasTargets);
 
       for (var observation : inputs[cameraIndex].observations) {
         allObservations.add(observation);

@@ -122,7 +122,6 @@ public class TrackedObjects {
    * @param matchedThisCycle Set of objects matched during this cycle
    * @return best matched tracked object or null if no suitable match found
    */
-  
   private TrackedObject findBestMatch(
       ObjectObservation observation, Set<TrackedObject> matchedThisCycle) {
 

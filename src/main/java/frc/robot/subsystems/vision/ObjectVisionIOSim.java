@@ -1,13 +1,17 @@
 package frc.robot.subsystems.vision;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.subsystems.vision.GamePieceLayout.GamePiecesOfType;
+import frc.robot.subsystems.vision.GamePieceLayout.Position;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -23,11 +27,12 @@ import org.littletonrobotics.junction.Logger;
 public class ObjectVisionIOSim extends ObjectVisionIOBase {
   @AutoLog
   public static class ObjectVisionIOSimGamePieces {
-    public int classID = 0;
+    public boolean gamePiecesLoaded;
+    public String className = "";
     public Pose3d[] fieldPoses = new Pose3d[0];
   }
 
-  private final ObjectVisionIOSimGamePiecesAutoLogged gamePieces =
+  private final ObjectVisionIOSimGamePiecesAutoLogged simGamePieces =
       new ObjectVisionIOSimGamePiecesAutoLogged();
 
   private static final double HORIZONTALFOVRAD = Math.toRadians(65.);
@@ -52,18 +57,12 @@ public class ObjectVisionIOSim extends ObjectVisionIOBase {
 
     super(cameraName, robotToCamera, robotPoseSupplier, objectHeightMeters);
 
-    // Load locations of balls
-    gamePieces.classID = 0;
-    int ballCount = 1;
-    gamePieces.fieldPoses = new Pose3d[ballCount];
+    // Load all game pieces in this layout
+    loadGamePieces("fuel_layout.json");
+    simGamePieces.gamePiecesLoaded = simGamePieces.fieldPoses.length > 0;
 
-    Pose3d gp1 =
-        new Pose3d(
-            new Translation3d(2.08, 4.04, ObjectVisionConstants.fuelDiameterInMeters / 2.),
-            new Rotation3d(0., 0., 0.));
-    gamePieces.fieldPoses[0] = gp1;
-
-    Logger.processInputs("ObjectVision/SimGamePieces", gamePieces);
+    // Log the game pieces; the poses can be displayed in AdvantageScope
+    Logger.processInputs("ObjectVision/SimGamePieces", simGamePieces);
   }
 
   /**
@@ -92,7 +91,7 @@ public class ObjectVisionIOSim extends ObjectVisionIOBase {
     Pose3d cameraPose = robotPose3d.transformBy(robotToCamera);
 
     // Test all of the predefined game pieces on the field
-    for (Pose3d gamePiecePose : gamePieces.fieldPoses) {
+    for (Pose3d gamePiecePose : simGamePieces.fieldPoses) {
       // Get the vector from the camera to the game piece being tested
       Transform3d cameraToObjectXform = new Transform3d(cameraPose, gamePiecePose);
       Translation3d cameraToObjectVector = cameraToObjectXform.getTranslation();
@@ -132,7 +131,7 @@ public class ObjectVisionIOSim extends ObjectVisionIOBase {
       // Estimate an area assuming that a ball at 1 meter fills about 10% of the image
       double kAreaAt1Meter = 0.10;
       double area = kAreaAt1Meter / (distance * distance);
-      area = MathUtil.clamp(area, 0.0, 1.0);         // Clamp to [0, 1]
+      area = MathUtil.clamp(area, 0.0, 1.0); // Clamp to [0, 1]
 
       // Estimate the pose of the object relative to the robot
       Pose3d robotRelativePose = estimateRobotRelativeObjectPose(tx, ty, objectHeightMeters);
@@ -157,5 +156,32 @@ public class ObjectVisionIOSim extends ObjectVisionIOBase {
     }
 
     return observations.toArray(ObjectObservation[]::new);
+  }
+
+  private void loadGamePieces(String jsonFileName) {
+
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+
+      File file = new File(Filesystem.getDeployDirectory(), "objectvision/" + jsonFileName);
+
+      GamePieceLayout layout = mapper.readValue(file, GamePieceLayout.class);
+
+      for (GamePiecesOfType gamePiecesOfType : layout.gamePiecesArray) {
+
+        // Get the positions of the game pieces of this type
+        List<Pose3d> fieldPoseList = new ArrayList<>();
+        for (Position position : gamePiecesOfType.fieldPositions) {
+          fieldPoseList.add(position.toPose3d());
+        }
+
+        simGamePieces.className = gamePiecesOfType.className;
+        simGamePieces.fieldPoses = fieldPoseList.toArray(new Pose3d[0]);
+      }
+
+    } catch (Throwable t) {
+      System.err.println("CRITICAL: " + t.getMessage());
+      t.printStackTrace();
+    }
   }
 }

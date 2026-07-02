@@ -154,19 +154,4 @@ public abstract class ObjectVisionIOBase implements ObjectVisionIO {
     // Return a pose for the target relative to the robot
     return new Pose3d(robotToObjectTranslation, Rotation3d.kZero);
   }
-
-  /**
-   * Return the name of the object class based on its id
-   *
-   * @param id ID of object class
-   * @return Name of the object class
-   */
-  private static String classNameFromId(int id) {
-
-    // NOTE: This needs to be updated whenever PhotonVision is trained on other types of objects
-    return switch (id) {
-      case 0 -> "fuel";
-      default -> "unknown";
-    };
-  }
 }

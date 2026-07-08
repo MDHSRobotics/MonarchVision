@@ -29,8 +29,10 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.FieldVision;
+import frc.robot.subsystems.vision.FieldVisionConstants;
 import frc.robot.subsystems.vision.FieldVisionIO;
 import frc.robot.subsystems.vision.FieldVisionIOLimelight;
+import frc.robot.subsystems.vision.FieldVisionIOPhotonVision;
 import frc.robot.subsystems.vision.FieldVisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.ObjectVision;
 import frc.robot.subsystems.vision.ObjectVisionConstants;
@@ -117,16 +119,28 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
 
-        fieldVision =
-            new FieldVision(
-                drive::addVisionMeasurement,
-                new FieldVisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-                new FieldVisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
-
-        if (ObjectVisionConstants.objectCameraInTheLoop) {
+        if (FieldVisionConstants.rubikInTheLoop) {
           // We are running simulation but with a real Rubik Pi3 and camera processed by
-          // PhotonVision
+          // PhotonVision to detect april tags
+          fieldVision =
+              new FieldVision(
+                  drive::addVisionMeasurement,
+                  new FieldVisionIOPhotonVision(
+                      FieldVisionConstants.rubikCameraName,
+                      FieldVisionConstants.robotToCameraTestHarness1));
 
+        } else {
+          // Simulate April tag detection using two cameras
+          fieldVision =
+              new FieldVision(
+                  drive::addVisionMeasurement,
+                  new FieldVisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
+                  new FieldVisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+        }
+
+        if (ObjectVisionConstants.rubikInTheLoop) {
+          // We are running simulation but with a real Rubik Pi3 and camera processed by
+          // PhotonVision to detect objects
           objectVision =
               new ObjectVision(
                   new ObjectVisionIOPhotonVision(

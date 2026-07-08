@@ -15,9 +15,9 @@ import frc.robot.Constants;
 public class ObjectVisionConstants {
 
   /** Are we running a physics simulator, but with a real Rubik Pi3 connected. */
-  public static boolean objectCameraInTheLoop = false;
+  public static boolean rubikInTheLoop = true;
 
-  public static String objectCameraName = "rubik-camera1";
+  public static String objectCameraName = "rubik_camera1";
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)

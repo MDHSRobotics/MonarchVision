@@ -14,8 +14,9 @@ public class GamePieceLayout {
 
   // This is to allow the layout to consist of more than one type of game piece
   public static class GamePiecesOfType {
-    public String className;      // Name for the game piece
-    public List<Position> fieldPositions = new ArrayList<>(); // One (x,y,z) position for each instance of this type of game piece
+    public String className; // Name for the game piece
+    public List<Position> fieldPositions =
+        new ArrayList<>(); // One (x,y,z) position for each instance of this type of game piece
   }
 
   public static class Position {

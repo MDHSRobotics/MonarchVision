@@ -16,10 +16,13 @@ import frc.robot.Constants;
 
 public class FieldVisionConstants {
 
-  /** Are we running a physics simulator, but with a real Rubik Pi3 connected. */
-  public static boolean rubikInTheLoop = true;
+  /** Are we running a physics simulator, but with a real camera connected. */
+  public static boolean rubikInTheLoop = false;
 
-  public static String rubikCameraName = "rubik_camera2";
+  public static boolean limelightInTheLoop = true;
+
+  public static String rubikInLoopCameraName = "rubik_camera2";
+  public static String limelightInLoopCameraName = "limelight-back";
 
   // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout =
@@ -40,7 +43,7 @@ public class FieldVisionConstants {
       new Transform3d(
           -Constants.robotLengthInMeters / 2.0, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
   // Camera position on test harness, simulated to be on front of robot, facing straight ahead
-  public static Transform3d robotToCameraTestHarness1 =
+  public static Transform3d robotToCameraRubikInLoop =
       new Transform3d(
           Constants.robotLengthInMeters / 2.0,
           0.0,

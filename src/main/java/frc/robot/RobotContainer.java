@@ -126,9 +126,16 @@ public class RobotContainer {
               new FieldVision(
                   drive::addVisionMeasurement,
                   new FieldVisionIOPhotonVision(
-                      FieldVisionConstants.rubikCameraName,
-                      FieldVisionConstants.robotToCameraTestHarness1));
+                      FieldVisionConstants.rubikInLoopCameraName,
+                      FieldVisionConstants.robotToCameraRubikInLoop));
 
+        } else if (FieldVisionConstants.limelightInTheLoop) {
+          // We are running simulation but with a real Limelight to detect april tags
+          fieldVision =
+              new FieldVision(
+                  drive::addVisionMeasurement,
+                  new FieldVisionIOLimelight(
+                      FieldVisionConstants.limelightInLoopCameraName, drive::getRotation));
         } else {
           // Simulate April tag detection using two cameras
           fieldVision =

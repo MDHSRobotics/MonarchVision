@@ -17,7 +17,7 @@ import frc.robot.Constants;
 public class FieldVisionConstants {
 
   /** Are we running a physics simulator, but with a real camera connected. */
-  public static boolean rubikInTheLoop = false;
+  public static boolean rubikInTheLoop = true;
 
   public static boolean limelightInTheLoop = true;
 
@@ -42,13 +42,14 @@ public class FieldVisionConstants {
   public static Transform3d robotToCamera1 =
       new Transform3d(
           -Constants.robotLengthInMeters / 2.0, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
+
   // Camera position on test harness, simulated to be on front of robot, facing straight ahead
   public static Transform3d robotToCameraRubikInLoop =
       new Transform3d(
           Constants.robotLengthInMeters / 2.0,
           0.0,
-          0.2,
-          new Rotation3d(0.0, Units.inchesToMeters(15.25), 0.0));
+          Units.inchesToMeters(17.625),
+          new Rotation3d(0.0, 0.0, 0.0));
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;

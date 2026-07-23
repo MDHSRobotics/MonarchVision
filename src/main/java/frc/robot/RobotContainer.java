@@ -39,6 +39,8 @@ import frc.robot.subsystems.vision.ObjectVisionConstants;
 import frc.robot.subsystems.vision.ObjectVisionIO;
 import frc.robot.subsystems.vision.ObjectVisionIOPhotonVision;
 import frc.robot.subsystems.vision.ObjectVisionIOSim;
+import java.util.ArrayList;
+import java.util.List;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -119,31 +121,40 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
 
+        // This is the list of "cameras" to use in simulation
+        // It will either be simulation cameras based on PhotonVision - or
+        // some combination of real Rubik and/or PhotonVision cameras acting as hw-in-the-loop
+        List<FieldVisionIO> simFieldVisionIoList = new ArrayList<>();
+
         if (FieldVisionConstants.rubikInTheLoop) {
           // We are running simulation but with a real Rubik Pi3 and camera processed by
           // PhotonVision to detect april tags
-          fieldVision =
-              new FieldVision(
-                  drive::addVisionMeasurement,
-                  new FieldVisionIOPhotonVision(
-                      FieldVisionConstants.rubikInLoopCameraName,
-                      FieldVisionConstants.robotToCameraRubikInLoop));
-
-        } else if (FieldVisionConstants.limelightInTheLoop) {
-          // We are running simulation but with a real Limelight to detect april tags
-          fieldVision =
-              new FieldVision(
-                  drive::addVisionMeasurement,
-                  new FieldVisionIOLimelight(
-                      FieldVisionConstants.limelightInLoopCameraName, drive::getRotation));
-        } else {
-          // Simulate April tag detection using two cameras
-          fieldVision =
-              new FieldVision(
-                  drive::addVisionMeasurement,
-                  new FieldVisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-                  new FieldVisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+          simFieldVisionIoList.add(
+              new FieldVisionIOPhotonVision(
+                  FieldVisionConstants.rubikInLoopCameraName,
+                  FieldVisionConstants.robotToCameraRubikInLoop));
         }
+
+        if (FieldVisionConstants.limelightInTheLoop) {
+          // We are running simulation but with a real Limelight to detect april tags
+          simFieldVisionIoList.add(
+              new FieldVisionIOLimelight(
+                  FieldVisionConstants.limelightInLoopCameraName, drive::getRotation));
+        }
+
+        if (simFieldVisionIoList.size() < 1) {
+          // There is no camera hardware in the loop to simulate April tag detection
+          // using two PhotonVisionSim cameras
+          simFieldVisionIoList.add(
+              new FieldVisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose));
+
+          simFieldVisionIoList.add(
+              new FieldVisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+        }
+        // Create the FieldVision object using the "cameras" selected above
+        fieldVision =
+            new FieldVision(
+                drive::addVisionMeasurement, simFieldVisionIoList.toArray(FieldVisionIO[]::new));
 
         if (ObjectVisionConstants.rubikInTheLoop) {
           // We are running simulation but with a real Rubik Pi3 and camera processed by

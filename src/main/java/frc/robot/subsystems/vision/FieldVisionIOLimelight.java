@@ -24,6 +24,9 @@ import java.util.function.Supplier;
 
 /** IO implementation for real Limelight hardware. */
 public class FieldVisionIOLimelight implements FieldVisionIO {
+
+  private final String cameraName;
+
   private final Supplier<Rotation2d> rotationSupplier;
   private final DoubleArrayPublisher orientationPublisher;
 
@@ -40,7 +43,8 @@ public class FieldVisionIOLimelight implements FieldVisionIO {
    * @param rotationSupplier Supplier for the current estimated rotation, used for MegaTag 2.
    */
   public FieldVisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier) {
-    var table = NetworkTableInstance.getDefault().getTable(name);
+    cameraName = name;
+    var table = NetworkTableInstance.getDefault().getTable(cameraName);
     this.rotationSupplier = rotationSupplier;
     orientationPublisher = table.getDoubleArrayTopic("robot_orientation_set").publish();
     latencySubscriber = table.getDoubleTopic("tl").subscribe(0.0);
@@ -49,6 +53,11 @@ public class FieldVisionIOLimelight implements FieldVisionIO {
     megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
     megatag2Subscriber =
         table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
+  }
+
+  // Get a human-friendly name for this interface
+  public String getName() {
+    return this.cameraName;
   }
 
   @Override

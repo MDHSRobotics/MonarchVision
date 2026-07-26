@@ -54,7 +54,7 @@ public class ObjectVision extends SubsystemBase {
 
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
       io[cameraIndex].updateInputs(inputs[cameraIndex]);
-      Logger.processInputs("ObjectVision/Camera" + cameraIndex, inputs[cameraIndex]);
+      Logger.processInputs("ObjectVision/Camera_" + io[cameraIndex].getName(), inputs[cameraIndex]);
 
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 

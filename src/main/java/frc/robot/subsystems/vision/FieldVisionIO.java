@@ -40,4 +40,9 @@ public interface FieldVisionIO {
   }
 
   public default void updateInputs(VisionIOInputs inputs) {}
+
+  // Get a human-friendly name for this interface
+  public default String getName() {
+    return "Unknown Camera Name";
+  }
 }

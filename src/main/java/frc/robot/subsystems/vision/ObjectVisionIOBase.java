@@ -36,6 +36,11 @@ public abstract class ObjectVisionIOBase implements ObjectVisionIO {
     this.objectHeightMeters = objectHeightMeters;
   }
 
+  // Get a human-friendly name for this interface
+  public String getName() {
+    return this.cameraName;
+  }
+
   /**
    * Return all of the object observations detected
    *

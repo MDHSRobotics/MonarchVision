@@ -36,4 +36,9 @@ public interface ObjectVisionIO {
    *     status of the camera plus an array of object observations
    */
   public default void updateInputs(ObjectVisionIOInputs inputs) {}
+
+  // Get a human-friendly name for this interface
+  public default String getName() {
+    return "Unknown Camera Name";
+  }
 }

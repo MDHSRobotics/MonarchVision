@@ -21,7 +21,8 @@ public class FieldVisionConstants {
 
   public static boolean limelightInTheLoop = true;
 
-  public static String rubikInLoopCameraName = "rubik_camera2";
+  public static String rubikCamera2InLoopName = "rubik_camera2";
+  public static String rubikCamera3InLoopName = "rubik_camera3";
   public static String limelightInLoopCameraName = "limelight-back";
 
   // AprilTag layout
@@ -43,13 +44,22 @@ public class FieldVisionConstants {
       new Transform3d(
           -Constants.robotLengthInMeters / 2.0, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
 
-  // Camera position on test harness, simulated to be on front of robot, facing straight ahead
-  public static Transform3d robotToCameraRubikInLoop =
+  // Camera positions on test harness
+  // One camera is simulated to be on front of robot, facing straight ahead
+  public static Transform3d robotToRubikCamera2InLoop =
       new Transform3d(
           Constants.robotLengthInMeters / 2.0,
           0.0,
           Units.inchesToMeters(17.625),
           new Rotation3d(0.0, 0.0, 0.0));
+
+  // The other camera is  simulated to be on left side of robot, facing straight ahead
+  public static Transform3d robotToRubikCamera3InLoop =
+      new Transform3d(
+          0.0,
+          Constants.robotWidthInMeters / 2.0,
+          Units.inchesToMeters(22),
+          new Rotation3d(0.0, 0.0, Math.PI / 2));
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;

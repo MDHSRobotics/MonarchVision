@@ -20,6 +20,7 @@ import org.photonvision.PhotonCamera;
 
 /** IO implementation for real PhotonVision hardware. */
 public class FieldVisionIOPhotonVision implements FieldVisionIO {
+  protected final String cameraName;
   protected final PhotonCamera camera; // Name of camera defined in PhontonVision dashboard
   protected final Transform3d robotToCamera; // Position and orientation of camera relative to robot
 
@@ -30,8 +31,14 @@ public class FieldVisionIOPhotonVision implements FieldVisionIO {
    * @param robotToCamera The 3D position of the camera relative to the robot.
    */
   public FieldVisionIOPhotonVision(String name, Transform3d robotToCamera) {
-    camera = new PhotonCamera(name);
+    cameraName = name;
+    camera = new PhotonCamera(cameraName);
     this.robotToCamera = robotToCamera;
+  }
+
+  // Get a human-friendly name for this interface
+  public String getName() {
+    return this.cameraName;
   }
 
   @Override

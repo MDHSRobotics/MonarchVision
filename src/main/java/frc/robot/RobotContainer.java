@@ -131,8 +131,12 @@ public class RobotContainer {
           // PhotonVision to detect april tags
           simFieldVisionIoList.add(
               new FieldVisionIOPhotonVision(
-                  FieldVisionConstants.rubikInLoopCameraName,
-                  FieldVisionConstants.robotToCameraRubikInLoop));
+                  FieldVisionConstants.rubikCamera2InLoopName,
+                  FieldVisionConstants.robotToRubikCamera2InLoop));
+          simFieldVisionIoList.add(
+              new FieldVisionIOPhotonVision(
+                  FieldVisionConstants.rubikCamera3InLoopName,
+                  FieldVisionConstants.robotToRubikCamera3InLoop));
         }
 
         if (FieldVisionConstants.limelightInTheLoop) {

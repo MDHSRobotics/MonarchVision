@@ -21,9 +21,9 @@ public class FieldVisionConstants {
 
   public static boolean limelightInTheLoop = true;
 
-  public static String rubikCamera2InLoopName = "rubik_camera2";
-  public static String rubikCamera3InLoopName = "rubik_camera3";
-  public static String limelightInLoopCameraName = "limelight-back";
+  public static String rubikBackCameraInLoopName = "rubik_camera2";
+  public static String rubikLeftCameraInLoopName = "rubik_camera3";
+  public static String limelightInLoopCameraName = "limelight-one";
 
   // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout =
@@ -35,6 +35,18 @@ public class FieldVisionConstants {
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
+
+  // NOTE: Pay attention to the signs of the camera rotation because they are not intuitive,
+  //       especially the pitch. You would think that a camera pointed down to the floor
+  //       would have a negative pitch but actually it should be positive. All the anlges use
+  //       the right-hand rule: point the thumb on your right hand in the positive direction
+  //       of the axis you are going to rotate about. Then your finger curl in the positive
+  //       direction of rotation. The convention is that the x-axis is positive toward the
+  //       front of the robot, y-axis is positive toward the right of the robot; z-axis is
+  //       positive vertically up. So pitch is a rotation about y-axis so point your right
+  //       thumb toward the right of the robot and you will see that curling your fingers
+  //       will tilt the front of the robot down.
+
   // First camera goes on the front of the robot, tilted down
   public static Transform3d robotToCamera0 =
       new Transform3d(
@@ -45,16 +57,19 @@ public class FieldVisionConstants {
           -Constants.robotLengthInMeters / 2.0, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
 
   // Camera positions on test harness
-  // One camera is simulated to be on front of robot, facing straight ahead
-  public static Transform3d robotToRubikCamera2InLoop =
+  // One camera is simulated to be on back of robot, pointing up
+  public static Transform3d robotToBackRubikCameraInLoop =
       new Transform3d(
-          Constants.robotLengthInMeters / 2.0,
+          -Constants.robotLengthInMeters / 2.0,
           0.0,
-          Units.inchesToMeters(17.625),
-          new Rotation3d(0.0, 0.0, 0.0));
+          Units.inchesToMeters(7),
+          new Rotation3d(
+              0.0,
+              -Math.toRadians(26), // Negative points up!!! See above.
+              Math.PI));
 
   // The other camera is  simulated to be on left side of robot, facing straight ahead
-  public static Transform3d robotToRubikCamera3InLoop =
+  public static Transform3d robotToLeftRubikCameraInLoop =
       new Transform3d(
           0.0,
           Constants.robotWidthInMeters / 2.0,

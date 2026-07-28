@@ -7,7 +7,7 @@
 
 package frc.robot;
 
-import static frc.robot.subsystems.vision.VisionConstants.*;
+import static frc.robot.subsystems.vision.FieldVisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -28,10 +28,20 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.CameraSpec;
+import frc.robot.subsystems.vision.FieldVision;
+import frc.robot.subsystems.vision.FieldVisionConstants;
+import frc.robot.subsystems.vision.FieldVisionIO;
+import frc.robot.subsystems.vision.FieldVisionIOLimelight;
+import frc.robot.subsystems.vision.FieldVisionIOPhotonVision;
+import frc.robot.subsystems.vision.FieldVisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.ObjectVision;
+import frc.robot.subsystems.vision.ObjectVisionConstants;
+import frc.robot.subsystems.vision.ObjectVisionIO;
+import frc.robot.subsystems.vision.ObjectVisionIOPhotonVision;
+import frc.robot.subsystems.vision.ObjectVisionIOSim;
+import java.util.ArrayList;
+import java.util.List;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -43,7 +53,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Vision vision;
+  private final FieldVision fieldVision;
+  private final ObjectVision objectVision;
 
   // Controller
   private final CommandPS4Controller controller = new CommandPS4Controller(0);
@@ -86,17 +97,19 @@ public class RobotContainer {
         // new ModuleIOTalonFXS(TunerConstants.BackLeft),
         // new ModuleIOTalonFXS(TunerConstants.BackRight));
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOLimelight(camera0Name, drive::getRotation),
-                new VisionIOLimelight(camera1Name, drive::getRotation));
-        // vision =
-        // new Vision(
-        // demoDrive::addVisionMeasurement,
-        // new VisionIOPhotonVision(camera0Name, robotToCamera0),
-        // new VisionIOPhotonVision(camera1Name, robotToCamera1));
+        // Get the list of cameras on the robot for field orientation
+        List<FieldVisionIO> robotFieldVisionIoList =
+            createFieldVisionIOList(false, FieldVisionConstants.robotCameras);
 
+        fieldVision =
+            new FieldVision(
+                drive::addVisionMeasurement, robotFieldVisionIoList.toArray(FieldVisionIO[]::new));
+
+        // Get the list of cameras on the robot for object detection
+        List<ObjectVisionIO> objectVisionIoList =
+            createObjectVisionIOList(false, ObjectVisionConstants.robotCameras);
+
+        objectVision = new ObjectVision(objectVisionIoList.toArray(ObjectVisionIO[]::new));
         break;
 
       case SIM:
@@ -110,12 +123,43 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+        //       ----------- VISION FOR FIELD ORIENTATION ----------------
 
+        // This is the list of "cameras" to use in simulation for field orientation
+        // It will either be simulation cameras based on PhotonVision - or
+        // some combination of real Limelight and/or PhotonVision cameras acting as hw-in-the-loop
+        List<FieldVisionIO> simFieldVisionIoList;
+        if (FieldVisionConstants.hardwareInTheLoop) {
+          // We are running simulation but with a real vision hardware to detect apriltags
+          simFieldVisionIoList =
+              createFieldVisionIOList(false, FieldVisionConstants.hardwareInLoopCameras);
+        } else {
+          // There is no camera hardware in the loop so this is pure simulation of April tag
+          // detection
+          simFieldVisionIoList = createFieldVisionIOList(true, FieldVisionConstants.robotCameras);
+        }
+        // Create the FieldVision object using the "cameras" selected above
+        fieldVision =
+            new FieldVision(
+                drive::addVisionMeasurement, simFieldVisionIoList.toArray(FieldVisionIO[]::new));
+
+        //       ----------- VISION FOR OBJECT DETECTION ----------------
+
+        // This is the list of "cameras" to use in simulation for object detection
+        List<ObjectVisionIO> simObjectVisionIoList;
+        if (ObjectVisionConstants.hardwareInTheLoop) {
+          // We are running simulation but with real vision hardware in the loop for object
+          // detection
+          simObjectVisionIoList =
+              createObjectVisionIOList(false, ObjectVisionConstants.hardwareInLoopCameras);
+        } else {
+          // There is no camera hardware in the loop so this is pure simulation of object detection
+          // using predefined positions of balls
+          simObjectVisionIoList =
+              createObjectVisionIOList(true, ObjectVisionConstants.robotCameras);
+        }
+        // Create the ObjectVision object using the camera above
+        objectVision = new ObjectVision(simObjectVisionIoList.toArray(ObjectVisionIO[]::new));
         break;
 
       default:
@@ -130,7 +174,11 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
 
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        fieldVision =
+            new FieldVision(
+                drive::addVisionMeasurement, new FieldVisionIO() {}, new FieldVisionIO() {});
+
+        objectVision = new ObjectVision(new ObjectVisionIO() {});
 
         break;
     }
@@ -156,6 +204,96 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+  }
+
+  private List<FieldVisionIO> createFieldVisionIOList(
+      Boolean inPureSimulation, CameraSpec[] cameraSpecArray) {
+
+    List<FieldVisionIO> fieldVisionIoList = new ArrayList<>();
+    for (int i = 0; i < cameraSpecArray.length; i++) {
+
+      if (inPureSimulation) {
+        // In pure simulation mode (i.e., without any hardware in the loop), always use
+        // PhotonVisionSim
+        // even if this is a Limelight because we cannot simulate Limelights
+        fieldVisionIoList.add(
+            new FieldVisionIOPhotonVisionSim(
+                cameraSpecArray[i].cameraName, cameraSpecArray[i].robotToCamera, drive::getPose));
+      } else {
+        // We are either running with a real robot or in simulation mode with vision hardware in the
+        // loop
+        switch (cameraSpecArray[i].visionType) {
+          case LIMELIGHT:
+            fieldVisionIoList.add(
+                new FieldVisionIOLimelight(cameraSpecArray[i].cameraName, drive::getRotation));
+            break;
+
+          case PHOTONVISION:
+            fieldVisionIoList.add(
+                new FieldVisionIOPhotonVision(
+                    cameraSpecArray[i].cameraName, cameraSpecArray[i].robotToCamera));
+            break;
+
+          default:
+            throw new IllegalArgumentException(
+                "Unknown vision type "
+                    + cameraSpecArray[i].visionType
+                    + " for camera "
+                    + cameraSpecArray[i].cameraName);
+        }
+      }
+    }
+
+    return fieldVisionIoList;
+  }
+
+  private List<ObjectVisionIO> createObjectVisionIOList(
+      Boolean inPureSimulation, CameraSpec[] cameraSpecArray) {
+
+    List<ObjectVisionIO> objectVisionIoList = new ArrayList<>();
+    for (int i = 0; i < cameraSpecArray.length; i++) {
+
+      // We are either running with a real robot or in simulation mode with vision hardware in the
+      // loop
+      switch (cameraSpecArray[i].visionType) {
+        case LIMELIGHT:
+          throw new IllegalArgumentException(
+              "Limelight object vision not yet implemented - Camera: "
+                  + cameraSpecArray[i].cameraName);
+
+        case PHOTONVISION:
+          if (inPureSimulation) {
+            // In pure simulation mode (i.e., without any hardware in the loop), always use
+            // PhotonVisionSim
+            // even if this is a Limelight because we cannot simulate Limelights
+            objectVisionIoList.add(
+                new ObjectVisionIOSim(
+                    cameraSpecArray[i].cameraName,
+                    cameraSpecArray[i].robotToCamera,
+                    drive::getPose,
+                    // Raise the ball by its radius so its bottom is on the floor:
+                    ObjectVisionConstants.fuelDiameterInMeters / 2.0)); // (meters)
+          } else {
+            objectVisionIoList.add(
+                new ObjectVisionIOPhotonVision(
+                    cameraSpecArray[i].cameraName,
+                    cameraSpecArray[i].robotToCamera,
+                    drive::getPose,
+                    // Raise the ball by its radius so its bottom is on the floor:
+                    ObjectVisionConstants.fuelDiameterInMeters / 2.0)); // (meters)
+          }
+          break;
+
+        default:
+          throw new IllegalArgumentException(
+              "Unknown vision type "
+                  + cameraSpecArray[i].visionType
+                  + " for camera "
+                  + cameraSpecArray[i].cameraName);
+      }
+    }
+
+    return objectVisionIoList;
   }
 
   /**

@@ -11,7 +11,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
-public interface VisionIO {
+public interface FieldVisionIO {
   @AutoLog
   public static class VisionIOInputs {
     public boolean connected = false;
@@ -40,4 +40,9 @@ public interface VisionIO {
   }
 
   public default void updateInputs(VisionIOInputs inputs) {}
+
+  // Get a human-friendly name for this interface
+  public default String getName() {
+    return "Unknown Camera Name";
+  }
 }

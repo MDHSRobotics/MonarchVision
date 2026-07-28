@@ -1,0 +1,90 @@
+// This class and related object-tracking classes were initially created by AI Claude
+// but subsequently modified and fully reviewed
+
+package frc.robot.subsystems.vision;
+
+import edu.wpi.first.math.geometry.Pose3d;
+import frc.robot.subsystems.vision.ObjectVisionIO.ObjectObservation;
+
+/***
+ *  Represents a single object being tracked across multiple observation cycles.
+ */
+public class TrackedObject {
+
+  public final int classId;
+  public final int id; // Unique ID for this tracked object
+
+  public Pose3d fieldPose; // Current best estimate of field position
+  Pose3d robotRelativePose; // Current best estimate of the object relative to the robot
+  public double lastSeenTimestamp;
+  public double firstSeenTimestamp;
+  public int consecutiveMisses;
+  public int hitCount;
+  public boolean confirmed; // True once seen MIN_HITS_TO_CONFIRM times
+
+  public TrackedObject(int id, ObjectObservation obs) {
+    this.id = id;
+    this.classId = obs.classId();
+    this.fieldPose = obs.fieldPose();
+    this.robotRelativePose = obs.robotRelativePose();
+    this.lastSeenTimestamp = obs.timestamp();
+    this.firstSeenTimestamp = obs.timestamp();
+    this.consecutiveMisses = 0;
+    this.hitCount = 1;
+    this.confirmed = false;
+
+    if (hitCount >= ObjectVisionConstants.MIN_HITS_TO_CONFIRM) {
+      confirmed = true;
+    }
+  }
+
+  /**
+   * Update this tracked object with a new matching observation.
+   *
+   * @param obs Observationto be used to update this tracked object
+   */
+  public void update(ObjectObservation obs) {
+    // Blend old and new pose to smooth out noise
+    fieldPose = blendPose(fieldPose, obs.fieldPose(), ObjectVisionConstants.BLEND_ALPHA);
+    robotRelativePose =
+        blendPose(robotRelativePose, obs.robotRelativePose(), ObjectVisionConstants.BLEND_ALPHA);
+    lastSeenTimestamp = obs.timestamp();
+    consecutiveMisses = 0;
+    hitCount++;
+
+    if (hitCount >= ObjectVisionConstants.MIN_HITS_TO_CONFIRM) {
+      confirmed = true;
+    }
+  }
+
+  /***
+   *  Returns true if this object has not been seen recently enough to keep.
+   */
+  public boolean isStale(double currentTimestamp) {
+    return (currentTimestamp - lastSeenTimestamp) > ObjectVisionConstants.MAX_STALENESS_SECONDS;
+  }
+
+  /**
+   * Returns the distance from this tracked object's pose to an observed pose.
+   *
+   * @param other
+   * @return Distance from this tracked object to the input "other" object
+   */
+  public double distanceTo(Pose3d other) {
+    return fieldPose.getTranslation().getDistance(other.getTranslation());
+  }
+
+  /**
+   * Linear interpolation between current and observed
+   *
+   * @param current
+   * @param observed
+   * @param alpha alpha=0 keeps current, alpha=1 snaps to observed
+   * @return
+   */
+  private static Pose3d blendPose(Pose3d current, Pose3d observed, double alpha) {
+    var translation = current.getTranslation().interpolate(observed.getTranslation(), alpha);
+    var rotation = current.getRotation().interpolate(observed.getRotation(), alpha);
+    return new Pose3d(translation, rotation);
+  }
+}

@@ -7,7 +7,7 @@
 
 package frc.robot.subsystems.vision;
 
-import static frc.robot.subsystems.vision.VisionConstants.*;
+import static frc.robot.subsystems.vision.FieldVisionConstants.*;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,9 +19,10 @@ import java.util.Set;
 import org.photonvision.PhotonCamera;
 
 /** IO implementation for real PhotonVision hardware. */
-public class VisionIOPhotonVision implements VisionIO {
-  protected final PhotonCamera camera;
-  protected final Transform3d robotToCamera;
+public class FieldVisionIOPhotonVision implements FieldVisionIO {
+  protected final String cameraName;
+  protected final PhotonCamera camera; // Name of camera defined in PhontonVision dashboard
+  protected final Transform3d robotToCamera; // Position and orientation of camera relative to robot
 
   /**
    * Creates a new VisionIOPhotonVision.
@@ -29,9 +30,15 @@ public class VisionIOPhotonVision implements VisionIO {
    * @param name The configured name of the camera.
    * @param robotToCamera The 3D position of the camera relative to the robot.
    */
-  public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
-    camera = new PhotonCamera(name);
+  public FieldVisionIOPhotonVision(String name, Transform3d robotToCamera) {
+    cameraName = name;
+    camera = new PhotonCamera(cameraName);
     this.robotToCamera = robotToCamera;
+  }
+
+  // Get a human-friendly name for this interface
+  public String getName() {
+    return this.cameraName;
   }
 
   @Override

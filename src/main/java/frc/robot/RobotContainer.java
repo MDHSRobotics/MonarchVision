@@ -235,7 +235,11 @@ public class RobotContainer {
             break;
 
           default:
-            System.out.println("Unknown vision type" + cameraSpecArray[i].visionType);
+            throw new IllegalArgumentException(
+                "Unknown vision type "
+                    + cameraSpecArray[i].visionType
+                    + " for camera "
+                    + cameraSpecArray[i].cameraName);
         }
       }
     }
@@ -249,28 +253,27 @@ public class RobotContainer {
     List<ObjectVisionIO> objectVisionIoList = new ArrayList<>();
     for (int i = 0; i < cameraSpecArray.length; i++) {
 
-      if (inPureSimulation) {
-        // In pure simulation mode (i.e., without any hardware in the loop), always use
-        // PhotonVisionSim
-        // even if this is a Limelight because we cannot simulate Limelights
-        objectVisionIoList.add(
-            new ObjectVisionIOSim(
-                cameraSpecArray[i].cameraName,
-                cameraSpecArray[i].robotToCamera,
-                drive::getPose,
-                // Raise the ball by its radius so its bottom is on the floor:
-                ObjectVisionConstants.fuelDiameterInMeters / 2.0)); // (meters)
-      } else {
-        // We are either running with a real robot or in simulation mode with vision hardware in the
-        // loop
-        switch (cameraSpecArray[i].visionType) {
-          case LIMELIGHT:
-            System.out.println(
-                "Limelight object vision not yet implemented - Camera: "
-                    + cameraSpecArray[i].cameraName);
-            break;
+      // We are either running with a real robot or in simulation mode with vision hardware in the
+      // loop
+      switch (cameraSpecArray[i].visionType) {
+        case LIMELIGHT:
+          throw new IllegalArgumentException(
+              "Limelight object vision not yet implemented - Camera: "
+                  + cameraSpecArray[i].cameraName);
 
-          case PHOTONVISION:
+        case PHOTONVISION:
+          if (inPureSimulation) {
+            // In pure simulation mode (i.e., without any hardware in the loop), always use
+            // PhotonVisionSim
+            // even if this is a Limelight because we cannot simulate Limelights
+            objectVisionIoList.add(
+                new ObjectVisionIOSim(
+                    cameraSpecArray[i].cameraName,
+                    cameraSpecArray[i].robotToCamera,
+                    drive::getPose,
+                    // Raise the ball by its radius so its bottom is on the floor:
+                    ObjectVisionConstants.fuelDiameterInMeters / 2.0)); // (meters)
+          } else {
             objectVisionIoList.add(
                 new ObjectVisionIOPhotonVision(
                     cameraSpecArray[i].cameraName,
@@ -278,15 +281,15 @@ public class RobotContainer {
                     drive::getPose,
                     // Raise the ball by its radius so its bottom is on the floor:
                     ObjectVisionConstants.fuelDiameterInMeters / 2.0)); // (meters)
-            break;
+          }
+          break;
 
-          default:
-            System.out.println(
-                "Unknown vision type "
-                    + cameraSpecArray[i].visionType
-                    + " for camera "
-                    + cameraSpecArray[i].cameraName);
-        }
+        default:
+          throw new IllegalArgumentException(
+              "Unknown vision type "
+                  + cameraSpecArray[i].visionType
+                  + " for camera "
+                  + cameraSpecArray[i].cameraName);
       }
     }
 

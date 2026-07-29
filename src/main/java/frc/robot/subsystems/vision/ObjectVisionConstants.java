@@ -67,7 +67,7 @@ public class ObjectVisionConstants {
 
   // Tuning constants for tracking objects
   public static final double MATCH_DISTANCE_METERS =
-      1.5 * ObjectVisionConstants.fuelDiameterInMeters;
+      0.5 * ObjectVisionConstants.fuelDiameterInMeters;
   public static final double MAX_STALENESS_SECONDS = 0.5;
   public static final double BLEND_ALPHA = 0.3;
   public static final int MIN_HITS_TO_CONFIRM = 3;

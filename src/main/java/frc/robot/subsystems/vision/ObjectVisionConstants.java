@@ -22,13 +22,13 @@ public class ObjectVisionConstants {
   //
   // 2. Pay attention to the signs of the camera rotation because they are not intuitive,
   //    especially the pitch. You would think that a camera pointed down to the floor
-  //    would have a negative pitch but actually it should be positive. All the anlges use
+  //    would have a negative pitch but actually it should be positive. All the angles use
   //    the right-hand rule: point the thumb on your right hand in the positive direction
   //    of the axis you are going to rotate about. Then your finger curl in the positive
   //    direction of rotation. The convention is that the x-axis is positive toward the
-  //    front of the robot, y-axis is positive toward the right of the robot; z-axis is
+  //    front of the robot, y-axis is positive toward the left of the robot; z-axis is
   //    positive vertically up. So pitch is a rotation about y-axis so point your right
-  //    thumb toward the right of the robot and you will see that curling your fingers
+  //    thumb toward the left of the robot and you will see that curling your fingers
   //    will tilt the front of the robot down.
 
   // The following is a definition of all cameras on the real robot used for object detection.
@@ -38,13 +38,13 @@ public class ObjectVisionConstants {
         VisionType.PHOTONVISION,
         "object_camera",
         new Transform3d(
-            -Constants.robotLengthInMeters / 2.0, // On back of robot
+            Constants.robotLengthInMeters / 2.0, // On front of robot
             0.0,
             Units.inchesToMeters(20.5),
             new Rotation3d(
                 0.0,
                 Math.toRadians(35.), // Positive points down!!! See above.
-                Math.PI))) // Facing backwards
+                0.))) // Facing forwards
   };
 
   // The following is a definition of all cameras on a test harness used to test

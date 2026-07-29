@@ -1,12 +1,17 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 /** Subsystem to process object observations */
@@ -112,5 +117,16 @@ public class ObjectVision extends SubsystemBase {
     }
 
     return allObservations.toArray(new ObjectVisionIO.ObjectObservation[0]);
+  }
+
+  public Optional<Translation2d> selectTarget(TargetLocator targetLocator, Pose2d robotPose) {
+
+    List<Translation2d> ballPositions =
+        Arrays.stream(trackedObjects.getConfirmedFieldPoses())
+            .map(Pose3d::getTranslation)
+            .map(Translation3d::toTranslation2d)
+            .toList();
+
+    return targetLocator.selectTarget(robotPose, ballPositions);
   }
 }

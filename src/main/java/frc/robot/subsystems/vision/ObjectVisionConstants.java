@@ -15,7 +15,7 @@ import frc.robot.Constants;
 public class ObjectVisionConstants {
 
   /** Are we running a physics simulator, but with a real Rubik Pi3 connected. */
-  public static boolean hardwareInTheLoop = true;
+  public static boolean hardwareInTheLoop = false;
 
   // Notes about robot to camera transforms
   // 1. Limelight does not yet support object detection (at least not well enough)
@@ -67,7 +67,7 @@ public class ObjectVisionConstants {
 
   // Tuning constants for tracking objects
   public static final double MATCH_DISTANCE_METERS =
-      0.5 * ObjectVisionConstants.fuelDiameterInMeters;
+      0.8 * ObjectVisionConstants.fuelDiameterInMeters;
   public static final double MAX_STALENESS_SECONDS = 0.5;
   public static final double BLEND_ALPHA = 0.3;
   public static final int MIN_HITS_TO_CONFIRM = 3;

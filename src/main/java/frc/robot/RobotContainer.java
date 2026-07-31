@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveToBallCluster;
+import frc.robot.commands.DriveRobotFeatureToTarget;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -41,6 +41,7 @@ import frc.robot.subsystems.vision.ObjectVisionConstants;
 import frc.robot.subsystems.vision.ObjectVisionIO;
 import frc.robot.subsystems.vision.ObjectVisionIOPhotonVision;
 import frc.robot.subsystems.vision.ObjectVisionIOSim;
+import frc.robot.subsystems.vision.TargetLocatorSimpleBallCluster;
 import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -312,7 +313,15 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    controller.triangle().whileTrue(new DriveToBallCluster(drive, objectVision));
+    // Drive to cluster of balls
+    controller
+        .triangle()
+        .whileTrue(
+            new DriveRobotFeatureToTarget(
+                drive,
+                objectVision,
+                new TargetLocatorSimpleBallCluster(),
+                Constants.robotToPickupXform));
 
     // Lock to 0°
     controller

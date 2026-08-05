@@ -1,0 +1,59 @@
+site_name: Monarch Vision for First Robotics Competition
+site_description: Documentation for FRC vision processing, simulation, replay, and hardware-in-the-loop testing
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: orange
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: orange
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - AdvantageKit and AdvantageScope: advantagekit/index.md
+  - Drive simulation: drive-simulation/index.md
+  - Replay: replay/index.md
+  - Simulating field vision: field-vision-simulation/index.md
+  - Simulating object detection: object-detection-simulation/index.md
+  - Drive to ball cluster: drive-to-ball-cluster/index.md
+  - Hardware in the Loop:
+      - Overview: hardware-in-loop/index.md
+      - Field vision: hardware-in-loop/field-vision.md
+      - Object detection: hardware-in-loop/object-detection.md
+  - Hardware Setup:
+      - Overview: hardware-setup/index.md
+      - Limelight: hardware-setup/limelight.md
+      - Rubik and Arducam cameras: hardware-setup/rubik-arducam.md
+  - Software Architecture: software-architecture/index.md
+  - Video Index: video-links.md

@@ -1,0 +1,95 @@
+The basics
+# Heading 1
+## Heading 2
+### Heading 3
+- Bullet
+- Bullet
+1. Numbered
+2. List
+
+Bold and italics
+**bold**
+*italic*
+`inline code`
+
+Code blocks
+```java
+Pose2d pose = estimator.getEstimatedPose();
+```
+
+Links
+[PhotonVision](https://photonvision.org)
+[Limelight Setup](../hardware-setup/limelight.md)
+
+Images
+![Rubik Pi](images/rubik.jpg)
+
+Tables
+| Camera | Purpose |
+|---------|---------|
+| Limelight | AprilTags |
+| Arducam 1 | Object detection |
+| Arducam 2 | Rear vision |
+
+Block quotes
+Useful for notes.
+> The camera transform must match the physical mounting.
+
+Checklists
+Nice when documenting work in progress.
+- [x] Simulate AprilTags
+- [x] Add Replay
+- [ ] Tune object detection
+
+Horizontal rule
+---
+Creates a divider.
+
+Material adds some very nice features
+These aren't standard Markdown—they come from MkDocs Material.
+
+Notes
+!!! note
+    PhotonVision publishes observations once per frame.
+Tips
+!!! tip
+    Log every vision observation.
+Warning
+!!! warning
+    Ignore stale pose observations.
+
+These render as attractive callout boxes.
+
+Collapsible sections
+??? note "Example"
+    Lots of explanation here.
+
+Click to expand.
+
+Mermaid diagrams
+Instead of drawing diagrams in Visio or PowerPoint, just write:
+```mermaid
+flowchart TD
+Camera --> VisionIO
+VisionIO --> VisionSubsystem
+VisionSubsystem --> DriveCommand
+```
+Material renders it into a diagram.
+
+Tabs
+Great when you want Java and C++ examples.
+=== "Java"
+    ```java
+    ...
+    ```
+=== "C++"
+    ```cpp
+    ...
+    ```
+
+Math
+If you ever document pose estimation:
+$$
+x = r\cos\theta
+$$
+Material renders it nicely.

@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -35,4 +37,8 @@ public final class Constants {
   // for the AdvantageScope robot on the 2D field
   public static final double robotLengthInMeters = Units.inchesToMeters(24.);
   public static final double robotWidthInMeters = Units.inchesToMeters(24.);
+
+  // Looking from above, how to locate the pickup opening relative to the center of the robot
+  public static final Transform2d robotToPickupXform =
+      new Transform2d(robotLengthInMeters / 2., 0., new Rotation2d(0.));
 }

@@ -1,4 +1,11 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/AdvantageKit/RealOutputs/Alerts": "Alerts",
@@ -37,7 +44,6 @@
   "NetworkTables Info": {
     "Clients": {
       "open": true
-    },
-    "visible": true
+    }
   }
 }

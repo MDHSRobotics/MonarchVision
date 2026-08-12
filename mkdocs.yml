@@ -1,4 +1,4 @@
-site_name: Monarch Vision for First Robotics Competition
+site_name: MonarchVision for FIRST® Robotics Competition
 site_description: Documentation for FRC vision processing, simulation, replay, and hardware-in-the-loop testing
 
 theme:
@@ -37,23 +37,51 @@ markdown_extensions:
       permalink: true
   - pymdownx.details
   - pymdownx.highlight
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
 nav:
   - Home: index.md
+  - Demonstrations: demos.md
+  - Simulation Framework: 
+      - Overview: simulation-framework/index.md
+      - AdvantageScope: simulation-framework/advantagescope.md
+      - AdvantageKit: simulation-framework/advantagekit.md
+      - Replay: simulation-framework/replay.md
+  - Vision Hardware: 
+      - Overview: vision-hardware/index.md
+      - Limelight: vision-hardware/limelight.md
+      - Rubik Pi3 / PhotonVision: vision-hardware/rubik.md
+  - Simulating with Vision Hardware:
+      - Overview: hardware-in-loop/index.md
+      - Field vision: hardware-in-loop/field-vision.md
+      - Object detection: hardware-in-loop/object-detection.md
+  - Simulating without Vision Hardware:
+      - Overview: pure-simulation/index.md
+      - Field vision: pure-simulation/field-vision.md
+      - Object detection: pure-simulation/object-detection.md
+      - Drive to object: pure-simulation/drive-to-object.md
+
+
   - AdvantageKit and AdvantageScope: advantagekit/index.md
   - Drive simulation: drive-simulation/index.md
   - Replay: replay/index.md
   - Simulating field vision: field-vision-simulation/index.md
   - Simulating object detection: object-detection-simulation/index.md
   - Drive to ball cluster: drive-to-ball-cluster/index.md
-  - Hardware in the Loop:
-      - Overview: hardware-in-loop/index.md
-      - Field vision: hardware-in-loop/field-vision.md
-      - Object detection: hardware-in-loop/object-detection.md
+
   - Hardware Setup:
       - Overview: hardware-setup/index.md
       - Limelight: hardware-setup/limelight.md
       - Rubik and Arducam cameras: hardware-setup/rubik-arducam.md
   - Software Architecture: software-architecture/index.md
   - Video Index: video-links.md
+
+extra_javascript:
+  - https://unpkg.com/mermaid@11/dist/mermaid.min.js
+
+extra_css:
+  - stylesheets/extra.css

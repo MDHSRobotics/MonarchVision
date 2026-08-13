@@ -46,15 +46,15 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Demonstrations: demos.md
-  - Simulation Framework: 
-      - Overview: simulation-framework/index.md
-      - AdvantageScope: simulation-framework/advantagescope.md
-      - AdvantageKit: simulation-framework/advantagekit.md
-      - Replay: simulation-framework/replay.md
   - Vision Hardware: 
       - Overview: vision-hardware/index.md
       - Limelight: vision-hardware/limelight.md
       - Rubik Pi3 / PhotonVision: vision-hardware/rubik.md
+  - Simulation Framework: 
+      - Overview: simulation-framework/index.md
+      - AdvantageScope: simulation-framework/advantagescope.md
+      - AdvantageKit: simulation-framework/advantagekit.md
+      - Replay: simulation-framework/advantagekit-replay.md
   - Simulating with Vision Hardware:
       - Overview: hardware-in-loop/index.md
       - Field vision: hardware-in-loop/field-vision.md
@@ -64,20 +64,6 @@ nav:
       - Field vision: pure-simulation/field-vision.md
       - Object detection: pure-simulation/object-detection.md
       - Drive to object: pure-simulation/drive-to-object.md
-
-
-  - AdvantageKit and AdvantageScope: advantagekit/index.md
-  - Drive simulation: drive-simulation/index.md
-  - Replay: replay/index.md
-  - Simulating field vision: field-vision-simulation/index.md
-  - Simulating object detection: object-detection-simulation/index.md
-  - Drive to ball cluster: drive-to-ball-cluster/index.md
-
-  - Hardware Setup:
-      - Overview: hardware-setup/index.md
-      - Limelight: hardware-setup/limelight.md
-      - Rubik and Arducam cameras: hardware-setup/rubik-arducam.md
-  - Software Architecture: software-architecture/index.md
   - Video Index: video-links.md
 
 extra_javascript:

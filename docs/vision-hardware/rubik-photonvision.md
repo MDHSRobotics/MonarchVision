@@ -1,6 +1,7 @@
 # Rubik Pi and Arducam Cameras
 
 ## Hardware
+- USB camera(s) attached to a [Rubik Pi 3 coprocess](https://www.thundercomm.com/product/rubik-pi/) running [PhotonVision](https://photonvision.org/) software.
 
 Document:
 

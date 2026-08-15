@@ -54,7 +54,7 @@ nav:
       - Overview: simulation-framework/index.md
       - AdvantageScope: simulation-framework/advantagescope.md
       - AdvantageKit: simulation-framework/advantagekit.md
-      - Replay: simulation-framework/advantagekit-replay.md
+      - Log Files: simulation-framework/advantagekit-log-files.md
   - Simulating with Vision Hardware:
       - Overview: hardware-in-loop/index.md
       - Field vision: hardware-in-loop/field-vision.md

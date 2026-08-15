@@ -107,7 +107,7 @@ public interface FieldVisionIO {
   public default void updateInputs(VisionIOInputs inputs) {}
 }
 ```
-The `@AutoLog` annotation will automatically generate a class (for example, VisionIOInputsAutoLogged) with methods to save the input data to a log file (`toLog`) and replay the data from a log (`fromLog`).  
+The `@AutoLog` annotation will automatically generate a class (for example, VisionIOInputsAutoLogged) with methods to save the input data to a log file (`toLog`) and replay the data from a log (`fromLog`).
 
 >Note that these classes are generated automatically during a gradle build and placed in the folder: build / classes / generated sources / annotationProcessor. You might have to invoke the build using Build Robot Code. If all else fails, bring up the command palette in VS Code (ctrl+Shift+P) and Run "Java: Clean Java Language Server Workspace". Then click "Reload and Delete".
 

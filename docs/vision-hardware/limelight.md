@@ -7,9 +7,15 @@ See the [Limelight 4 documentation](https://docs.limelightvision.io/docs/docs-li
 
 ## Hardware Setup
 
-Connect the Limelight to a power source. On a real robot, hardware the Limelight to the PDP, PDH, or Mini PDP, using a 5A or 10A breaker. for bench testing, connect a dedicated USB-C power cable to the Limelight.
+To connect the Limelight to a real robot:
 
-Connect an ethernet cable from the laptop to the Limelight.
+- Hardwire the Limelight to the PDP, PDH, or Mini PDP, using a 5A or 10A breaker
+- Connect an ethernet cable from the radio on the robot to the Limelight
+  
+To connect the Limelight to a laptop for bench testing:
+
+- Connect a dedicated USB-C power cable to the Limelight. (Power from a USB port on the laptop may be insufficient.)
+- Connect an ethernet cable from the laptop to the Limelight
 
 ## Update Firmware and Drivers
 

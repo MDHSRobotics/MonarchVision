@@ -49,7 +49,7 @@ nav:
   - Vision Hardware: 
       - Overview: vision-hardware/index.md
       - Limelight: vision-hardware/limelight.md
-      - Rubik Pi3 / PhotonVision: vision-hardware/rubik.md
+      - Rubik Pi3 / PhotonVision: vision-hardware/rubik-photonvision.md
   - Simulation Framework: 
       - Overview: simulation-framework/index.md
       - AdvantageScope: simulation-framework/advantagescope.md

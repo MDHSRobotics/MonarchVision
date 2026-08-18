@@ -57,6 +57,7 @@ nav:
       - Log Files: simulation-framework/advantagekit-log-files.md
   - Simulating with Vision Hardware:
       - Overview: hardware-in-loop/index.md
+      - Setup: hardware-in-loop/setup.md
       - Field vision: hardware-in-loop/field-vision.md
       - Object detection: hardware-in-loop/object-detection.md
   - Simulating without Vision Hardware:

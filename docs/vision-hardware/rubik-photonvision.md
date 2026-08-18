@@ -88,7 +88,7 @@ ssh photon@192.168.4.71
 
 
 ## PhotonVision Settings
-The PhotonVision dashboard, like the Limelight dashboard, is where you define cameras, configure them, set up pipelines, etc. To display the dashboard from your laptop type the following URL into a browser (changing the ip address of the Rubik as needed). It's a good idea to have a favorite or shortcut for this.
+The PhotonVision dashboard, like the Limelight web interface, is where you define cameras, configure them, set up pipelines, etc. To display the dashboard from your laptop type the following URL into a browser (changing the ip address of the Rubik as needed). It's a good idea to have a favorite or shortcut for this.
 ```
 http://192.168.4.71:5800/
 ```

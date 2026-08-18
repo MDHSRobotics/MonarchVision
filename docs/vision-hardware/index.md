@@ -5,4 +5,4 @@ This section documents the installation and set up of physical cameras and assoc
 ## Topics
 
 - [Limelight:](limelight.md) Limelight smart camera with built-in coprocessor
-- [Rubik / PhotonVision:](rubik-photonvision) USB camera(s) attached to a Rubik Pi 3 coprocess running PhotonVision
+- [Rubik / PhotonVision:](rubik-photonvision) USB camera(s) attached to a Rubik Pi 3 coprocessor running PhotonVision

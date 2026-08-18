@@ -17,7 +17,7 @@ import frc.robot.Constants;
 public class FieldVisionConstants {
 
   /** Are we running a physics simulator, but with a real camera connected. */
-  public static boolean hardwareInTheLoop = false;
+  public static boolean hardwareInTheLoop = true;
 
   // Notes about robot to camera transforms
   // 1. These are not used for Limelight; instead you configure it in web UI. However, we

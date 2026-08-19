@@ -1,6 +1,6 @@
-# Hardware-in-the-Loop Field Vision
+# Hardware-in-the-Loop: Field Vision
 
-This section describes how to run an AdvantageScope simulation session using real vision devices on a test board connected to your laptop.
+This section describes how to run an AdvantageScope simulation session using real vision devices on a test board connected to your laptop to detect apriltags. This enables the robot's position orientation on the field to be estimated accurately and displayed in AvantageScope.
 >Make sure that all of the [setup](hil-setup.md) has been completed first.
 
 ## Start Simulation
@@ -21,10 +21,10 @@ If the Limelight device is not detected, double check your [Limelight setup](../
 
 - `Custom NT Server` ip address is wrong
 - Firewall issue
-- Full 3d targeting is not turned on 
+- Full 3d targeting is not turned on
 
 ## Rubik / PhotonVision
-See below for an example of hardware-in-the-loop where the Rubik / USB cameras detect apriltags. The picture on the left shows the back of the test board pointing toward apriltags. The picture on the right shows how it is simultaneously simulated in AdvantageScope: apriltags 13 and 14 are detected (red lines from USB#1) and the robot's odometry is updated to position the robot correctly relative to those tags. Note that the "robot" position and orientation are similar in both pictures. As the test board is moved, the graphical view in AdvantageScope is updated. ![Limelight HIL](../images/field-hil-pv2.jpg)
+See below for an example of hardware-in-the-loop where the Rubik / USB cameras detect apriltags. The picture on the left shows the back of the test board pointing toward apriltags. The picture on the right shows how it is simultaneously simulated in AdvantageScope: apriltags 13 and 14 are detected (red lines from USB#1) and the robot's odometry is updated to position the robot correctly relative to those tags. Note that the "robot" position and orientation are similar in both pictures. As the test board is moved, the graphical view in AdvantageScope is updated. ![PhtotonVision HIL](../images/field-hil-pv2.jpg)
 
 While simulating with real Rubik / PhotonVision cameras on a test board, you have access to all of the normal capabilities presented in the PhotonVision dashboard: ![PV dashboard](../images/pv-dashboard-hil2.jpg)
 

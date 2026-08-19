@@ -20,6 +20,8 @@ Pose2d pose = estimator.getEstimatedPose();
 Links
 [PhotonVision](https://photonvision.org)
 [Limelight Setup](../hardware-setup/limelight.md)
+[Installation Steps](setup.md#step-2-configuration) - link to subsection on another page
+
 
 Images
 ![Rubik Pi](images/rubik.jpg)

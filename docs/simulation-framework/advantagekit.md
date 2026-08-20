@@ -1,9 +1,9 @@
 # AdvantageKit
 
 ## Overview
-MonarchVision logs all input and output data for all subsystems using the [AdvantageKit](https://docs.advantagekit.org/) framework. This enables efficient debugging during a simulation session as well as the ability to easily replay the log file from a previous session (whether it was a simulation session or one for a real robot). In addition, MonarchVision's architectitecture is aligned with that of the AdvantageKit template projects to enable subsystems (especially drive and vision) to be developed and debugged in a hardware-independent manner, as well as simulated.
+MonarchVision logs all input and output data for all subsystems using the [AdvantageKit](https://docs.advantagekit.org/) framework. This enables efficient debugging during a simulation session as well as the ability to easily replay the log file from a previous session (whether it was a simulation session or one for a real robot). In addition, MonarchVision's architectitecture is aligned with that of the AdvantageKit [template projects](https://docs.advantagekit.org/getting-started/template-projects) to enable subsystems (especially drive and vision) to be developed and debugged in a hardware-independent manner, as well as simulated.
 
-This section describes the software architecture and how to log data. The [next section](advantagekit-replay.md) explains how to replay a log file.
+This section describes the software architecture and how to log data. The [next section](advantagekit-log-files.md) explains how to record, inspect, and replay log files.
 
 ## Installation
 See the [AdvantageKit Installation documentation](https://docs.advantagekit.org/getting-started/installation/) for information on how to install its vendordep and related topics.

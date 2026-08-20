@@ -65,7 +65,6 @@ nav:
       - Setup: pure-simulation/sim-setup.md
       - Field vision: pure-simulation/sim-field-vision.md
       - Object detection: pure-simulation/sim-object-detection.md
-      - Drive to object: pure-simulation/sim-drive-to-object.md
   - Video Index: video-links.md
 
 extra_javascript:

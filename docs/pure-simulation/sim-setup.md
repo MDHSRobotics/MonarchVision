@@ -44,23 +44,23 @@ If you are using vision devices to detect objects, edit the Java code as follows
   public static boolean hardwareInTheLoop = false;
 ```
 
-2. If necessary, change  `robotCameras` in `ObjectVisionConstants.java` which defines the camera(s) on the robot to be used for detecting objects. Each `CameraSpec`  specifies the type of camera, its name, and its position and orientation relative to the center of the robot. In the example below, there is a single Rubik / PhotonVision camera on the back of the robot, pointing down.
+2. If necessary, change  `robotCameras` in `ObjectVisionConstants.java` which defines the camera(s) on the robot to be used for detecting objects. Each `CameraSpec`  specifies the type of camera, its name, and its position and orientation relative to the center of the robot. In the example below, there is a single Rubik / PhotonVision camera on the front of the robot, pointing down.
 
 ```java
-  // The following is a definition of all cameras on a test harness used to test
-  // vision hardware-in-the-loop object detection
-  public static CameraSpec[] hardwareInLoopCameras = {
+  // The following is a definition of all cameras on the real robot used for object detection.
+  // These are also used by simulation
+  public static CameraSpec[] robotCameras = {
     new CameraSpec(
         VisionType.PHOTONVISION,
-        "rubik_camera1",
+        "object_camera",
         new Transform3d(
-            -Constants.robotLengthInMeters / 2.0, // On back of robot
+            Constants.robotLengthInMeters / 2.0, // On front of robot
             0.0,
             Units.inchesToMeters(20.5),
             new Rotation3d(
                 0.0,
                 Math.toRadians(35.), // Positive points down!!! See above.
-                Math.PI))) // Facing backwards
+                0.))) // Facing forwards
   };
 ```
 ### Virtual Game Pieces

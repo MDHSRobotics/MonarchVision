@@ -3,32 +3,27 @@
 This section describes how to use AdvantageScope to simulate an entire robot, including virtual vision devices which detect apriltags in the virtual environment of the playing field. This enables the robot's position and orientation on the field to be estimated accurately and displayed in AvantageScope.
 >Make sure that all of the [setup](sim-setup.md) has been completed first.
 
-## Start Simulation
+## Start-up
 
 1. Start the simulation session. [Click here for detailed instructions on startup.](../simulation-framework/advantagescope.md#simulation-startup)
 2. In AdvantageScope, use the `2D Field` and/or `3D Field` tab to view the location of the robot and lines of sight to april tags on the field. [Click here for instructions on how visualize the poses of the robot and apriltag vision targets.](../simulation-framework/advantagescope.md#simulating-field-location)
-3. Make sure that the displayed poses in AdvantageScope correspond to the vision devices installed on your test board. Below are the poses that correspond to the test board [described earlier.](../hil-setup#test-board-and-targets) The green vision target is for the Limelight; the red and blue are for Rubik cameras.  ![Field poses](../images/advantagescope-hil-field-poses.jpg)
+3. Make sure that the displayed poses in AdvantageScope correspond to the `robotCameras` defined in the [Field Vision settings](sim-setup.md#settings-for-field-vision). See below for the poses that correspond to the Limelight cameras defined on the front (green) and back (red) of the robot.  ![Field poses](../images/sim-field/as-field-poses.jpg)
 
-## Limelight
-See below for an example of hardware-in-the-loop where the Limelight detects apriltags. The picture on the left shows the front of the test board pointing toward apriltags. The picture on the right shows how it is simultaneously simulated in AdvantageScope: apriltags 13 and 14 are detected (green lines) and the robot's odometry is updated to position the robot correctly relative to those tags. Note that the "robot" position and orientation are similar in both pictures. As the test board is moved, the graphical view in AdvantageScope is updated. ![Limelight HIL](../images/field-hil-ll1.jpg)
-
-While simulating with real Limelight devices on a test board, you have access to all of the normal capabilities presented in the Limelight web client: ![LL client HIL](../images/ll-client-hil1.jpg)
+## Simulating Teleop
+In the Robot Simulation GUI, select `Teleoperated` and use the controller to drive the robot around the virtual playing field. As you do,the red and green lines of sight will indicate which apriltags are being detected. See below for an example. ![Sim lines of sights](../images/sim-field/as-apriltag-targets.jpg)
 
 
-### Troubleshooting
+ You can also get a simulated view from each camera by typing the address `<wireless ip address>:<port#>` into a browser window. The `port#` is 1182 for first camera, 1184 for the second, etc. The example below shows the simulated camera views for the front and back cameras. Note that these are perspective views so apriltags in the distance are small and would in practice not actually be detected by real hardware. ![Stream cameras](../images/sim-field/browser_camera_stream.jpg)
 
-If the Limelight device is not detected, double check your [Limelight setup](../hil-setup#limelight-setup). Most likely problems are:
+## Simulating Autonomous
+Since odometry accuracy is particularly important during the autonomous period, it's a good practice to simulate auto commands in AdvantageScope to ensure that apriltags are visible throughout the robot's movements:
 
-- `Custom NT Server` ip address is wrong
-- Firewall issue
-- Full 3d targeting is not turned on
-
-## Rubik / PhotonVision
-See below for an example of hardware-in-the-loop where the Rubik / USB cameras detect apriltags. The picture on the left shows the back of the test board pointing toward apriltags. The picture on the right shows how it is simultaneously simulated in AdvantageScope: apriltags 13 and 14 are detected (red lines from USB#1) and the robot's odometry is updated to position the robot correctly relative to those tags. Note that the "robot" position and orientation are similar in both pictures. As the test board is moved, the graphical view in AdvantageScope is updated. ![PhtotonVision HIL](../images/field-hil-pv2.jpg)
-
-While simulating with real Rubik / PhotonVision cameras on a test board, you have access to all of the normal capabilities presented in the PhotonVision dashboard: ![PV dashboard](../images/pv-dashboard-hil2.jpg)
+1. Start the Elastic tool and select an Auto command to run. ![Elastic Auto](../images/sim-field/elastic-auto.jpg)
+2. In the Robot Simulation GUI, select `Autonomous` to initiate the auto command. When the `Simple Auto` executes, you will notice that the apriltags are in view throughout.
 
 
-### Troubleshooting
+## Troubleshooting
+Double check your [setup](sim-setup.md). The most likely issues are:
 
-If the PhotonVision devices are not detected, [double check your Rubik / PhotonVision setup](../hil-setup#photonVision-settings). The most likely problem is that the NetworkTables Server is not connected. If that is the case, you will see the following in the Settings tab of the PhotonVision dashboard. ![PV no NT](../images/pv-dashboard-no-networktables.jpg)
+- `hardwareInTheLoop` is set to true in `FieldVisionConstants.java`
+- AdvantageScope is not connected to the NetworkTables simulator

@@ -1,7 +1,7 @@
-# Hardware-in-the-Loop: Field Vision
+# Pure Simulation: Field Vision
 
-This section describes how to run an AdvantageScope simulation session using real vision devices on a test board connected to your laptop to detect apriltags. This enables the robot's position and orientation on the field to be estimated accurately and displayed in AvantageScope.
->Make sure that all of the [setup](hil-setup.md) has been completed first.
+This section describes how to use AdvantageScope to simulate an entire robot, including virtual vision devices which detect apriltags in the virtual environment of the playing field. This enables the robot's position and orientation on the field to be estimated accurately and displayed in AvantageScope.
+>Make sure that all of the [setup](sim-setup.md) has been completed first.
 
 ## Start Simulation
 

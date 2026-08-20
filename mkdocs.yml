@@ -62,9 +62,10 @@ nav:
       - Object detection: hardware-in-loop/hil-object-detection.md
   - Simulating without Vision Hardware:
       - Overview: pure-simulation/index.md
-      - Field vision: pure-simulation/field-vision.md
-      - Object detection: pure-simulation/object-detection.md
-      - Drive to object: pure-simulation/drive-to-object.md
+      - Setup: pure-simulation/sim-setup.md
+      - Field vision: pure-simulation/sim-field-vision.md
+      - Object detection: pure-simulation/sim-object-detection.md
+      - Drive to object: pure-simulation/sim-drive-to-object.md
   - Video Index: video-links.md
 
 extra_javascript:

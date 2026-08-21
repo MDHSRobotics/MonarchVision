@@ -7,6 +7,7 @@ theme:
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.footer
     - search.highlight
     - search.suggest
     - content.code.copy
@@ -66,6 +67,11 @@ nav:
       - Field vision: pure-simulation/sim-field-vision.md
       - Object detection: pure-simulation/sim-object-detection.md
   - Video Index: video-links.md
+
+copyright: Copyright &copy; 2026 MDHS Robotics
+
+extra:
+  generator: false
 
 extra_javascript:
   - https://unpkg.com/mermaid@11/dist/mermaid.min.js

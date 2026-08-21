@@ -43,7 +43,7 @@ MonarchVision can be run in one of three modes: real robot, simulation, or repla
     REPLAY
   }
 ```
-In replay mode, MonarchVision, running in VSCode, reads input data from an existing log file (for example, `akit_26-08-12_08-00-56.wpilog`) and recomputes all output data using the current version of the code, which might be diffeent from when the original log file was generated. Since the replay is executing in VSCode, you can set breakpoints to check the internal state of the code at any point in time. The replay session generates a second log file (for example, `akit_26-08-14_10-58-04_replay.wpilog`) which can then be inspected with AdvantageScope in the same way as the original log file.
+In replay mode, MonarchVision, running in VSCode, reads input data from an existing log file (for example, `akit_26-08-12_08-00-56.wpilog`) and recomputes all output data using the current version of the code, which might be different from when the original log file was generated. Since the replay is executing in VSCode, you can set breakpoints to check the internal state of the code at any point in time. The replay session generates a second log file (for example, `akit_26-08-14_10-58-04_replay.wpilog`) which can then be inspected with AdvantageScope in the same way as the original log file.
 
 Replay uses the following priorities to determine the log file to be replayed:
 

@@ -15,7 +15,7 @@ This section documents how to install, set up, and use a vision system based on 
 Some of the benefits of the Rubik Pi 3 / PhotonVision system:
 
 - **Cost Effective** - A single Rubik Pi 3 can support up to three cameras which makes for a very cost-effective solution. Even a single camera set-up is much less expensive than one Limelight 4.
-- **Odometry Confidence** - Multiple camera installation improves the likelihood of continually having line of sight to at least one april tag on the field so that  odometry accurately reflects the robot's position and orientation on the field.
+- **Odometry Confidence** - Multiple camera installation improves the likelihood of continually having line of sight to at least one april tag on the field so that odometry accurately reflects the robot's position and orientation on the field.
 - **Object Detection** - Rubik Pi 3 / PhotonVision supports object detection out of the box, having been trained on the 2026 FRC game pieces (fuel balls). It's likely that it will support object detection for future seasons as well.
 
 ## Resources

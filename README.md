@@ -1,4 +1,4 @@
-# Mater Dei Vision Simulation
+# Mater Dei Vision Simulation (MonarchVision)
 
 This is a reference app based on AdvantageKit and its associated templates for utilizing vision hardware and software, including simulation support.
 

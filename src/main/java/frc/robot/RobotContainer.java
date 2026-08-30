@@ -41,6 +41,7 @@ import frc.robot.subsystems.vision.FieldVisionIOReplayable;
 import frc.robot.subsystems.vision.ObjectVision;
 import frc.robot.subsystems.vision.ObjectVisionConstants;
 import frc.robot.subsystems.vision.ObjectVisionIO;
+import frc.robot.subsystems.vision.ObjectVisionIOLimelight;
 import frc.robot.subsystems.vision.ObjectVisionIOPhotonVision;
 import frc.robot.subsystems.vision.ObjectVisionIOReplayable;
 import frc.robot.subsystems.vision.ObjectVisionIOSim;
@@ -289,9 +290,14 @@ public class RobotContainer {
         // We are either running with a real robot, hardware-in-the-loop, or in simulation mode
         switch (cameraSpecArray[i].visionType) {
           case LIMELIGHT:
-            throw new IllegalArgumentException(
-                "Limelight object vision not yet implemented - Camera: "
-                    + cameraSpecArray[i].cameraName);
+            objectVisionIoList.add(
+                new ObjectVisionIOLimelight(
+                    cameraSpecArray[i].cameraName,
+                    cameraSpecArray[i].robotToCamera,
+                    drive::getPose,
+                    // Raise the ball by its radius so its bottom is on the floor:
+                    ObjectVisionConstants.fuelDiameterInMeters / 2.0)); // (meters)
+            break;
 
           case PHOTONVISION:
             if (inPureSimulation) {

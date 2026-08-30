@@ -9,13 +9,13 @@ This section describes how to use AdvantageScope to simulate detection of object
 2. In AdvantageScope, use the `2D Field` and/or `3D Field` tab to view the location of the robot and lines of sight to objects detected on the field. [Click here for instructions on how visualize the poses of the robot and object vision targets.](../simulation-framework/advantagescope.md#simulating-object-detection)
 3. Add `RealOutputs/ObjectVision/ConfirmedTrackedObjects/FieldPoses` to the AdvantageScope poses so that lines of sight are displayed from the camera to detected objects.
 4. Add `ObjectVision/SimGamePieces/FieldPoses` to the AdvantageScope poses so that the **detectable** game pieces are displayed on the virtual field. See [game piece definition](sim-setup.md#virtual-game-pieces) for how to define where these game pieces should be displayed.
-   
+
 See below for the complete set of poses for:
 
 - Robot
 - Lines of sight from camera on the front of the robot to detected objects
 - Detectable objects
-  
+
 ![Field poses](../images/sim-object/as-object-poses.jpg)
 
 ## Simulating

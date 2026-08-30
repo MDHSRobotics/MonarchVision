@@ -67,7 +67,7 @@ public abstract class ObjectVisionIOBase implements ObjectVisionIO {
     inputs.observations = getObservations(fieldToRobot);
 
     inputs.targetCount = inputs.observations.length;
-    if (inputs.targetCount > 1) {
+    if (inputs.targetCount > 0) {
       inputs.latestTimestampSeconds = inputs.observations[inputs.targetCount - 1].timestamp();
     }
 

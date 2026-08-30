@@ -15,7 +15,7 @@ import frc.robot.Constants;
 public class ObjectVisionConstants {
 
   /** Are we running a physics simulator, but with a real Rubik Pi3 connected. */
-  public static boolean hardwareInTheLoop = false;
+  public static boolean hardwareInTheLoop = true;
 
   // Notes about robot to camera transforms
   // 1. Limelight does not yet support object detection (at least not well enough)
@@ -60,7 +60,18 @@ public class ObjectVisionConstants {
             new Rotation3d(
                 0.0,
                 Math.toRadians(35.), // Positive points down!!! See above.
-                Math.PI))) // Facing backwards
+                Math.PI))), // Facing backwards
+    new CameraSpec(
+        VisionType.LIMELIGHT,
+        "limelight-one",
+        new Transform3d(
+            Constants.robotLengthInMeters / 2.0, // On front of robot
+            0.0,
+            Units.inchesToMeters(26),
+            new Rotation3d(
+                0.0,
+                Math.toRadians(36.), // Positive points down!!! See above.
+                0.))) // Facing forward
   };
 
   public static double fuelDiameterInMeters = 0.15; // Fuel ball is 15 cm in diameter

@@ -67,8 +67,14 @@ nav:
       - Field vision: pure-simulation/sim-field-vision.md
       - Object detection: pure-simulation/sim-object-detection.md
   - Video Index: video-links.md
+  - Acknowledgments: acknowledgments.md
 
-copyright: Copyright &copy; 2026 MDHS Robotics
+copyright: >
+  Copyright &copy; 2026 Paul Sicking.
+  Created for FRC Monarchs Robotics Team 4141.
+  Except where otherwise noted, original documentation is licensed under
+  <a href="https://creativecommons.org/licenses/by/4.0/">
+  CC BY 4.0</a>.
 
 extra:
   generator: false

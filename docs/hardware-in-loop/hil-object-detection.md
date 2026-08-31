@@ -18,7 +18,16 @@ While simulating with real Rubik / PhotonVision cameras on a test board, you hav
 
 ### Troubleshooting
 
-If the PhotonVision devices are not detected, [double check your Rubik / PhotonVision setup](../hil-setup#photonvision-settings). The most likely problem is that the NetworkTables Server is not connected. If that is the case, you will see the following in the Settings tab of the PhotonVision dashboard. ![PV no NT](../images/pv-dashboard-no-networktables.jpg)
+If the PhotonVision devices are not detected, [double check your Rubik / PhotonVision setup](hil-setup.md#photonvision-settings). The most likely problem is that the NetworkTables Server is not connected. If that is the case, you will see the following in the Settings tab of the PhotonVision dashboard. ![PV no NT](../images/pv-dashboard-no-networktables.jpg)
 
 ## Limelight
->MonarchVision does not currently support object detection with Limelight.
+Object detection with Limelight works in a similar way as described above. The detection results can be visualized in AdvantageScope and in the Limelight web interface.
+
+### Troubleshooting
+
+If the Limelight device is not detected, double check your [Limelight setup](../hardware-in-loop/hil-setup.md#limelight-settings). Most likely problems are:
+
+- `Custom NT Server` ip address is wrong
+- Firewall issue
+- `Detector Runtime` is not set to `Hailo`
+- HEF and label files have not been uploaded

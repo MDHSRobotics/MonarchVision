@@ -97,20 +97,31 @@ If you are using some of the vision devices to detect objects, edit the Java cod
             new Rotation3d(
                 0.0,
                 Math.toRadians(35.), // Positive points down!!! See above.
-                Math.PI))) // Facing backwards
+                Math.PI))), // Facing backwards
+    new CameraSpec(
+        VisionType.LIMELIGHT,
+        "limelight-one",
+        new Transform3d(
+            Constants.robotLengthInMeters / 2.0, // On front of robot
+            0.0,
+            Units.inchesToMeters(26),
+            new Rotation3d(
+                0.0,
+                Math.toRadians(36.), // Positive points down!!! See above.
+                0.))) // Facing forward
   };
 ```
 
 ## Limelight Settings
 If you have Limelight devices on the test board, do the following.
 
-1. Plug a dedicated USB power-only cable into the top of the Limelight. (Do not use power from a USB port on your laptop.)
-2. Connect an RJ45 enternet cable from your laptop to the bottom of the Limelight.
-3. Find the Ethernet address of your laptop by running `ipconfig` in a Powershell. (Do not use the wireless ip address.) ![Laptop ipconfig](../images/laptop-ipconfig-ethernet.jpg)
+1. Find the Ethernet address of your laptop by running `ipconfig` in a Powershell. (Do not use the wireless ip address.) ![Laptop ipconfig](../images/laptop-ipconfig-ethernet.jpg)
 4. Enter that address (`169.254.176.182`) as the custom Network Tables server address at the bottom of the Settings tab of the Limelight web client. This ensures that Limelight sends its results to the NetworkTable server so they can be read by the robot program and displayed in AdvantageScope. ![LL NT server](../images/ll-dashboard-nt-server.jpg)
 5. If necessary, turn off your firewall.
 
->Important: make sure that "Full 3D Targeting" is turned on in the Advanced tab of the Limelight web interface.
+>For Apriltag detection: make sure that `Full 3D Targeting` is turned on in the Advanced tab of the Limelight web interface.
+
+>For Object detection: make sure that: a) `Detector Runtime` is set to `Hailo`; b) HEF and label files have been uploaded
 
 ## PhotonVision Settings
 

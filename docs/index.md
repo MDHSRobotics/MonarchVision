@@ -33,6 +33,8 @@ MonarchVision relies heavily on technology developed by [FRC Team 6328](https://
 
 Portions of the Java code and documentation were drafted with the assistance of generative AI tools. All code was reviewed, tested, and refined by the author.
 
+See [our Acknowledgments page.](acknowledgments.md)
+
 ## Feedback and Suggestions
 
 This documentation is based on our experience developing and testing vision, simulation, and hardware-in-the-loop systems for FRC. If you find an error,

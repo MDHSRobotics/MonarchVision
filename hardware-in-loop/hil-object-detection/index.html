@@ -855,6 +855,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Limelight">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1073,6 +1090,33 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../acknowledgments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acknowledgments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -1147,6 +1191,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Limelight">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1181,11 +1242,17 @@
 <p>See below for an example of hardware-in-the-loop where a Rubik / USB camera detects objects. The picture on the left shows the back of the test board surrounded by five fuel balls on the floor. The picture on the right shows how it is simultaneously simulated in AdvantageScope: four of the five balls are detected, with yellow lines of sight displayed from the camera to the detected objects. Note that the relative positions of the detected balls are similar in both pictures. As the test board is moved, the graphical view in AdvantageScope is updated. <img alt="PhotonVision HIL" src="../../images/hil-object/hil-object-pv-sidebyside.jpg" /></p>
 <p>While simulating with real Rubik / PhotonVision cameras on a test board, you have access to all of the normal capabilities presented in the PhotonVision dashboard: <img alt="PV dashboard" src="../../images/hil-object/pv-dashboard.jpg" /></p>
 <h3 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h3>
-<p>If the PhotonVision devices are not detected, <a href="../hil-setup#photonvision-settings">double check your Rubik / PhotonVision setup</a>. The most likely problem is that the NetworkTables Server is not connected. If that is the case, you will see the following in the Settings tab of the PhotonVision dashboard. <img alt="PV no NT" src="../../images/pv-dashboard-no-networktables.jpg" /></p>
+<p>If the PhotonVision devices are not detected, <a href="../hil-setup/#photonvision-settings">double check your Rubik / PhotonVision setup</a>. The most likely problem is that the NetworkTables Server is not connected. If that is the case, you will see the following in the Settings tab of the PhotonVision dashboard. <img alt="PV no NT" src="../../images/pv-dashboard-no-networktables.jpg" /></p>
 <h2 id="limelight">Limelight<a class="headerlink" href="#limelight" title="Permanent link">&para;</a></h2>
-<blockquote>
-<p>MonarchVision does not currently support object detection with Limelight.</p>
-</blockquote>
+<p>Object detection with Limelight works in a similar way as described above. The detection results can be visualized in AdvantageScope and in the Limelight web interface.</p>
+<h3 id="troubleshooting_1">Troubleshooting<a class="headerlink" href="#troubleshooting_1" title="Permanent link">&para;</a></h3>
+<p>If the Limelight device is not detected, double check your <a href="../hil-setup/#limelight-settings">Limelight setup</a>. Most likely problems are:</p>
+<ul>
+<li><code>Custom NT Server</code> ip address is wrong</li>
+<li>Firewall issue</li>
+<li><code>Detector Runtime</code> is not set to <code>Hailo</code></li>
+<li>HEF and label files have not been uploaded</li>
+</ul>
 
 
 
@@ -1261,7 +1328,8 @@
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2026 MDHS Robotics
+      Copyright &copy; 2026 Paul Sicking. Created for FRC Monarchs Robotics Team 4141. Except where otherwise noted, original documentation is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0</a>.
+
     </div>
   
   

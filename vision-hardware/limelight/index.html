@@ -453,6 +453,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Hardware Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installing-on-a-real-robot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing on a Real Robot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installing-for-bench-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing for Bench Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -474,6 +502,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Limelight Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-apriltags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline - Apriltags
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-object-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline - Object Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1067,6 +1123,33 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../acknowledgments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acknowledgments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -1113,6 +1196,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Hardware Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installing-on-a-real-robot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing on a Real Robot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installing-for-bench-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing for Bench Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1134,6 +1245,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Limelight Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-apriltags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline - Apriltags
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-object-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline - Object Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1159,15 +1298,17 @@
 <p>This secion documents how to install, set up, and use the <a href="https://limelightvision.io/">Limelight</a> smart camera with built-in coprocessor. It specifically discusses the Limelight 4 but is largely applicable to other models.</p>
 <p>See the <a href="https://docs.limelightvision.io/docs/docs-limelight/getting-started/limelight-4">Limelight 4 documentation</a> for detailed information about mounting, setup, and usage.</p>
 <h2 id="hardware-setup">Hardware Setup<a class="headerlink" href="#hardware-setup" title="Permanent link">&para;</a></h2>
+<h3 id="installing-on-a-real-robot">Installing on a Real Robot<a class="headerlink" href="#installing-on-a-real-robot" title="Permanent link">&para;</a></h3>
 <p>To connect the Limelight to a real robot:</p>
 <ul>
-<li>Hardwire the Limelight to the PDP, PDH, or Mini PDP, using a 5A or 10A breaker</li>
-<li>Connect an ethernet cable from the radio on the robot to the Limelight</li>
+<li><strong>Power</strong> - Hardwire the Limelight to the PDP, PDH, or Mini PDP, using a 5A or 10A breaker</li>
+<li><strong>Data</strong> - Connect an ethernet cable from the radio on the robot to the Limelight</li>
 </ul>
+<h3 id="installing-for-bench-testing">Installing for Bench Testing<a class="headerlink" href="#installing-for-bench-testing" title="Permanent link">&para;</a></h3>
 <p>To connect the Limelight to a laptop for bench testing:</p>
 <ul>
-<li>Connect a dedicated USB-C power cable to the Limelight. (Power from a USB port on the laptop may be insufficient.)</li>
-<li>Connect an ethernet cable from the laptop to the Limelight</li>
+<li><strong>Power</strong> - For general setup and apriltag detection, power can be supplied to the Limelight by a dedicated USB-C power cable. (Power from a USB port on the laptop may be insufficient.) However, for object detection, power must be supplied by a 12V DC, 3A regulated power adapter. You can attach a female barrel-to-screw-terminal adapter to the end of the power cable and then connect red/black wires from the barrel connector to the Limelight.</li>
+<li><strong>Data</strong> - Connect an ethernet cable from the laptop to the Limelight</li>
 </ul>
 <h2 id="update-firmware-and-drivers">Update Firmware and Drivers<a class="headerlink" href="#update-firmware-and-drivers" title="Permanent link">&para;</a></h2>
 <p>Install the <a href="https://docs.limelightvision.io/docs/resources/downloads">Limelight Hardware Manager</a></p>
@@ -1194,10 +1335,31 @@
 After the ip addresses are listed, click on the ethernet address (in this case, 169.254.131.175) <img alt="IP addresses" src="../../images/ll-hw-mgr-ipaddr.jpg" />
 This will display the Limelight web interface in a browser window.</p>
 <p>Go to the Settings tab to change the team number and Hostname <img alt="LL dashboard" src="../../images/ll-dashboard-settings.jpg" /></p>
-<p>Go to the <code>Pipelines</code> tab on the left to configure pipelines.</p>
+<h3 id="pipeline-apriltags">Pipeline - Apriltags<a class="headerlink" href="#pipeline-apriltags" title="Permanent link">&para;</a></h3>
+<p>To set up a pipeline to detect apriltags, do the following.</p>
+<ol>
+<li>Go to the <code>Pipelines</code> tab on the left to configure pipelines.</li>
+<li>Asign a pipeline number, give it a name, and specify type of <code>AprilTags</code>.<img alt="LL apriltag id" src="../../images/hw-limelight/pipeline-apriltag-id.jpg" /></li>
+<li>
 <p>Click the Advanced tab at the top to set the <code>Full 3D Targeting</code> to <code>Yes</code> and to define the location and orientation of the Limelight camera relative to the center of the robot. These settings are <code>LL Forward</code>, <code>LL Right</code>, etc. Afterwards, apriltags will be detected and shown in the graphics window on the right. <img alt="Pipelines" src="../../images/ll-dashboard-pipelines-advanced.jpg" /></p>
+</li>
+<li>
 <p>Click the <code>Input</code> tag at the top to configure the pipeline (exposure, etc.). On that tab, click <code>Switch to MJPEG</code>:  <img alt="Inputs tab" src="../../images/ll-dashboard-inputs.jpg" /></p>
+</li>
+</ol>
 <p>This will give you a camera view along with detected april tags: <img alt="Inputs camera" src="../../images/ll-dashboard-pipelines-input.jpg" /></p>
+<h3 id="pipeline-object-detection">Pipeline - Object Detection<a class="headerlink" href="#pipeline-object-detection" title="Permanent link">&para;</a></h3>
+<p>To set up a pipeline to detect objects such as game pieces (fuel for the 2026 competition), do the following.</p>
+<ol>
+<li>Go to the <code>Pipelines</code> tab on the left to configure pipelines.</li>
+<li>Make sure that the Hailo accelerator is installed on your Limelight. You can verify this in the upper right banner of the web interface.<img alt="LL Hailo" src="../../images/hw-limelight/ll-hailo.png" />   </li>
+<li>Asign a pipeline number, give it a name, and specify type of <code>Neural Detector</code>.<img alt="LL neural id" src="../../images/hw-limelight/pipeline-neural-id.jpg" /></li>
+<li>Download from the <a href="https://docs.limelightvision.io/docs/resources/downloads">Limelight Downloads page</a> the neural network model and labels for the type of objects you want to detect. For fuel game pieces from the 2026 competition, download <code>Fuel B1 Model</code> (.hef file) and the <code>Fuel Labels</code> (.txt file).</li>
+<li>On the <code>Configuration</code> tab upload the HEF and label files.</li>
+<li>Switch the <code>Detector Runtime</code> from <code>CPU</code> to <code>Hailo</code>. (Otherwise, it will detect common objects like chars rather than fuels.)</li>
+<li>click <code>Switch to MJPEG</code> to see the results of object detection: <img alt="LL object detection" src="../../images/hw-limelight/ll-object-detection.png" /></li>
+<li>To improve detection results, you can adjust the camera and pipeline settings (<code>Confidence Threshold</code>, <code>Exposures</code>, <code>Sensor Gain</code>, <code>Distance/size</code>, <code>Lighting/background</code>). Also, results tend to be better when the objects are more the 2-3 feet from the Limelight.</li>
+</ol>
 
 
 
@@ -1273,7 +1435,8 @@ This will display the Limelight web interface in a browser window.</p>
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2026 MDHS Robotics
+      Copyright &copy; 2026 Paul Sicking. Created for FRC Monarchs Robotics Team 4141. Except where otherwise noted, original documentation is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0</a>.
+
     </div>
   
   

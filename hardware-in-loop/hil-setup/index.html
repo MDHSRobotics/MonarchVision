@@ -1095,6 +1095,33 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../acknowledgments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acknowledgments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -1301,20 +1328,30 @@
 <span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">Rotation3d</span><span class="p">(</span>
 <span class="w">                </span><span class="mf">0.0</span><span class="p">,</span>
 <span class="w">                </span><span class="n">Math</span><span class="p">.</span><span class="na">toRadians</span><span class="p">(</span><span class="mf">35.</span><span class="p">),</span><span class="w"> </span><span class="c1">// Positive points down!!! See above.</span>
-<span class="w">                </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="p">)))</span><span class="w"> </span><span class="c1">// Facing backwards</span>
+<span class="w">                </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="p">))),</span><span class="w"> </span><span class="c1">// Facing backwards</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">CameraSpec</span><span class="p">(</span>
+<span class="w">        </span><span class="n">VisionType</span><span class="p">.</span><span class="na">LIMELIGHT</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;limelight-one&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Transform3d</span><span class="p">(</span>
+<span class="w">            </span><span class="n">Constants</span><span class="p">.</span><span class="na">robotLengthInMeters</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="c1">// On front of robot</span>
+<span class="w">            </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">            </span><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="mi">26</span><span class="p">),</span>
+<span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">Rotation3d</span><span class="p">(</span>
+<span class="w">                </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                </span><span class="n">Math</span><span class="p">.</span><span class="na">toRadians</span><span class="p">(</span><span class="mf">36.</span><span class="p">),</span><span class="w"> </span><span class="c1">// Positive points down!!! See above.</span>
+<span class="w">                </span><span class="mf">0.</span><span class="p">)))</span><span class="w"> </span><span class="c1">// Facing forward</span>
 <span class="w">  </span><span class="p">};</span>
 </code></pre></div>
 <h2 id="limelight-settings">Limelight Settings<a class="headerlink" href="#limelight-settings" title="Permanent link">&para;</a></h2>
 <p>If you have Limelight devices on the test board, do the following.</p>
 <ol>
-<li>Plug a dedicated USB power-only cable into the top of the Limelight. (Do not use power from a USB port on your laptop.)</li>
-<li>Connect an RJ45 enternet cable from your laptop to the bottom of the Limelight.</li>
 <li>Find the Ethernet address of your laptop by running <code>ipconfig</code> in a Powershell. (Do not use the wireless ip address.) <img alt="Laptop ipconfig" src="../../images/laptop-ipconfig-ethernet.jpg" /></li>
 <li>Enter that address (<code>169.254.176.182</code>) as the custom Network Tables server address at the bottom of the Settings tab of the Limelight web client. This ensures that Limelight sends its results to the NetworkTable server so they can be read by the robot program and displayed in AdvantageScope. <img alt="LL NT server" src="../../images/ll-dashboard-nt-server.jpg" /></li>
 <li>If necessary, turn off your firewall.</li>
 </ol>
 <blockquote>
-<p>Important: make sure that "Full 3D Targeting" is turned on in the Advanced tab of the Limelight web interface.</p>
+<p>For Apriltag detection: make sure that <code>Full 3D Targeting</code> is turned on in the Advanced tab of the Limelight web interface.</p>
+<p>For Object detection: make sure that: a) <code>Detector Runtime</code> is set to <code>Hailo</code>; b) HEF and label files have been uploaded</p>
 </blockquote>
 <h2 id="photonvision-settings">PhotonVision Settings<a class="headerlink" href="#photonvision-settings" title="Permanent link">&para;</a></h2>
 <p>If you have a Rubik Pi 3 running PhotonVision on the test board, do the following.</p>
@@ -1398,7 +1435,8 @@
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2026 MDHS Robotics
+      Copyright &copy; 2026 Paul Sicking. Created for FRC Monarchs Robotics Team 4141. Except where otherwise noted, original documentation is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0</a>.
+
     </div>
   
   

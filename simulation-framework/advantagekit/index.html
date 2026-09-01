@@ -1372,8 +1372,10 @@
 
     subgraph IMP["ObjectVisionIO Implementations"]
         direction TB
+        LIM["ObjectIOLimelight&lt;br/&gt;&lt;br/&gt;Vision inputs from Limelight"]
         PHO["ObjectVisionIOPhotonVision&lt;br/&gt;&lt;br/&gt;Vision inputs from PhotonVision"]
         SIM["ObjectVisionIOSim&lt;br/&gt;&lt;br/&gt;Simulated vision inputs"]
+        LIM ~~~ PHO
         PHO ~~~ SIM
     end
 

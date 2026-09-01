@@ -69,8 +69,10 @@ flowchart LR
 
     subgraph IMP["ObjectVisionIO Implementations"]
         direction TB
+        LIM["ObjectIOLimelight<br/><br/>Vision inputs from Limelight"]
         PHO["ObjectVisionIOPhotonVision<br/><br/>Vision inputs from PhotonVision"]
         SIM["ObjectVisionIOSim<br/><br/>Simulated vision inputs"]
+        LIM ~~~ PHO
         PHO ~~~ SIM
     end
 

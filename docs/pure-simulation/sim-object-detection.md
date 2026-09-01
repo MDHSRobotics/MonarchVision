@@ -22,7 +22,7 @@ See below for the complete set of poses for:
 As the robot moves around the virtual field, whether in Teleop or Autonomous mode, game pieces will be detected if they are in the field of view of the object camera. In the picture below on the left, the robot is near detectable fuel objects but the camera is not pointing toward them so nothing is detected. The picture on the right shows that fuel is detected once the robot rotates so that the camera is facing some of the objects. ![Fuel detection](../images/sim-object/as-fuel-detection.jpg)
 
 ## Drive to Object
-The main reason for detecting game pieces on the field is to optimize how the robot interacts with them. As an example, a command could determine a drive path to intake the maximize amount of detected fuel in the vicinity of the robot. MonarchVision has a simple command called `DriveRobotFeatureToTarget` to accomplish such a task. The command does the following:
+The main reason for detecting game pieces on the field is to automate how the robot interacts with them. As an example, a command could determine a drive path to intake the maximize number of detected fuel in the vicinity of the robot. MonarchVision has a simple command called `DriveRobotFeatureToTarget` to illustrate such a task. The command does the following:
 
 - Categorizes detected fuel into clusters
 - Prioritizes the clusters

@@ -1,31 +1,31 @@
 # MonarchVision Application
 
 ## Overview
-[MonarchVision](https://github.com/MDHSRobotics/MonarchVision.git) is a Java reference application developed by [FRC Team 4141](https://www.materdei.org/apps/pages/robotics) from Mater Dei High School in Santa Ana, California for exploring and implementing vision-related hardware and software. It is a reference application in the sense that it controls a hypothetical robot based on the FIRST KitBot but its architecture and concepts can be adapted to real-world applications and robots. This site documents how to set up vision hardware and simulate its behavior with or without vision hardware physically connected to the computer running the simulation.
+[MonarchVision](https://github.com/MDHSRobotics/MonarchVision.git) is a Java reference application developed for [FRC Team 4141](https://www.materdei.org/apps/pages/robotics) from Mater Dei High School in Santa Ana, California. It is intended to be used by students to learn, explore, and implement vision-related hardware and software for FRC robotics. MonarchVision is a reference application in the sense that it controls a hypothetical robot based on the FIRST KitBot but its architecture and concepts can be adapted to real-world applications and robots. This site documents how to set up vision hardware and simulate its behavior with or without vision hardware physically connected to the computer running the simulation.
 
-The overriding goal of MonarchVision is to illustrate techniques that improve the productivity of FRC programming by minimizing the need for a fully assembled robot - or any robot at all, for that matter. Utilizing the virtual environment provided the FRC AdvantageScope tool teams can prototype and perfect designs (hardware and software) much earlier in the season.
+The overriding goal of MonarchVision is to illustrate techniques that improve the productivity of FRC programming by minimizing the need for a fully assembled robot - or any robot at all, for that matter. Utilizing the virtual environment provided the FRC AdvantageScope tool, students can prototype and refine designs (hardware and software) much earlier in the season.
 
 MonarchVision employs Limelight as well as Rubik Pi3 vision hardware to accomplish tasks, such as:
 
-- Accurate field odometry based on april tag detection by Rubik Pi3 and/or Limelight
-- Object detection (2026 fuel balls) by Rubik Pi3
-- Graphical simulation using AdvantageScope with or without vision hardware-in-the-loop
-- Command to automatically drive to detected objects (2026 fuel balls)
-- Comprehensive logging of all input and output data enabling playback in AdavantageScope
-
-The MonarchVision code and associated documentation can be found in the Github at https://github.com/MDHSRobotics/MonarchVision.git.
+- Maintain accurate field odometry based on april tag detection
+- Detect game piece objects (2026 fuel balls)
+- Automatically drive to detected objects
+- Graphical simulate robot behavior with or without connected vision devices
 
 ## Main topics
 
-- AdvantageKit and AdvantageScope
-- Drive simulation
-- Replay
-- Simulating field vision
-- Simulating object detection
-- Driving to a ball cluster
-- Hardware-in-the-loop testing
-- Vision hardware setup
-- Software architecture
+This site documents the following topics.
+
+- Installation and set up of vision hardware (Limelight and the Rubik Pi3 coprocessor and cameras)
+- The simulation environment provided by AdvantageScope to graphically represent the behavior of the robot as it responds to visually detected objects on the field (apriltags and game pieces)
+- Comprehensive logging based on the AdvantageKit framework, facilitating debugging and replay
+- Software architecture that minimizes the impact of changes to the design of vision sub-systems on the robot 
+- Hardware-in-the-loop simulation, enabling Limelight and/or Rubik devices to be physically connected the to computer running the simulation
+- Pure simulation of vision sub-systems without any connected hardware
+
+The MonarchVision code and associated documentation can be found in Github at https://github.com/MDHSRobotics/MonarchVision.git.
+
+>MonarchVision has not yet been updated to accommodate the Systemcore architecture which will be used for the 2027 competition.
 
 ## Acknowledgements
 

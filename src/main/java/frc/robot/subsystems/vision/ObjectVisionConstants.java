@@ -15,7 +15,7 @@ import frc.robot.Constants;
 public class ObjectVisionConstants {
 
   /** Are we running a physics simulator, but with a real Rubik Pi3 connected. */
-  public static boolean hardwareInTheLoop = true;
+  public static boolean hardwareInTheLoop = false;
 
   // Notes about robot to camera transforms
   // 1. Limelight does not yet support object detection (at least not well enough)

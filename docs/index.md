@@ -19,7 +19,7 @@ This site documents the following topics.
 - Installation and set up of vision hardware (Limelight and the Rubik Pi3 coprocessor and cameras)
 - The simulation environment provided by AdvantageScope to graphically represent the behavior of the robot as it responds to visually detected objects on the field (apriltags and game pieces)
 - Comprehensive logging based on the AdvantageKit framework, facilitating debugging and replay
-- Software architecture that minimizes the impact of changes to the design of vision sub-systems on the robot 
+- Software architecture that minimizes the impact of changes to the design of vision sub-systems on the robot
 - Hardware-in-the-loop simulation, enabling Limelight and/or Rubik devices to be physically connected the to computer running the simulation
 - Pure simulation of vision sub-systems without any connected hardware
 

@@ -67,7 +67,7 @@ This will give you a camera view along with detected april tags: ![Inputs camera
 To set up a pipeline to detect objects such as game pieces (fuel for the 2026 competition), do the following.
 
 1. Go to the `Pipelines` tab on the left to configure pipelines.
-2. Make sure that the Hailo accelerator is installed on your Limelight. You can verify this in the upper right banner of the web interface.![LL Hailo](../images/hw-limelight/ll-hailo.png)   
+2. Make sure that the Hailo accelerator is installed on your Limelight. You can verify this in the upper right banner of the web interface.![LL Hailo](../images/hw-limelight/ll-hailo.png)
 3. Asign a pipeline number, give it a name, and specify type of `Neural Detector`.![LL neural id](../images/hw-limelight/pipeline-neural-id.jpg)
 4. Download from the [Limelight Downloads page](https://docs.limelightvision.io/docs/resources/downloads) the neural network model and labels for the type of objects you want to detect. For fuel game pieces from the 2026 competition, download `Fuel B1 Model` (.hef file) and the `Fuel Labels` (.txt file).
 5. On the `Configuration` tab upload the HEF and label files.
